@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="mercedf1"
 	ProjectGUID="{C83B586D-8FA2-42B4-B773-9449260E1F2C}"
+	RootNamespace="mercedf1"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>

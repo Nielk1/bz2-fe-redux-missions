@@ -18,6 +18,11 @@ char* _Text10 = "You failed to protect the\ntransport as directed. Without\nthe 
 char* _Text11 = "Defend the transports in the\nconvoy. Each one is carrying\ncritical components necessary\nfor our mission's success.";
 char* _Text12 = "haha, you lazy mpi players\njust plain suck. LOL";
 
+#define DRONEODF "nadir"
+#define SCOUTODF "ivscout11"
+#define SERVODF "ivserv"
+#define CARGOODF "ivcargo"
+
 void EDF00Mission::Init(void)
 {
 	if(i_array)
@@ -65,17 +70,17 @@ void EDF00Mission::Init(void)
 	
 	Object_WyndtEssex = GetHandle("Rodriguez");
 
-	Object_Rodnav1 = GetHandle("rodnav");
-	Object_Rodnav2 = GetHandle("rodnav2");
-	Object_Krudernav = GetHandle("Krudernav");
+	//Object_Rodnav1 = GetHandle("rodnav");
+	//Object_Rodnav2 = GetHandle("rodnav2");
+	//Object_Krudernav = GetHandle("Krudernav");
 	Object_Corbernav = GetHandle("Corbernav");
 	Object_Condor = GetHandle("condor");
 
-	Object_LandingZone = GetHandle("landing zone");
-	Object_ConvoyHalt = GetHandle("convoy halt");
-	Object_HardingNav = GetHandle("harding_nav");
-	Object_Red = GetHandle("red");
-	Object_Blue = GetHandle("blue");
+	//Object_LandingZone = GetHandle("landing zone");
+	//Object_ConvoyHalt = GetHandle("convoy halt");
+	//Object_HardingNav = GetHandle("harding_nav");
+	//Object_Red = GetHandle("red");
+	//Object_Blue = GetHandle("blue");
 
 	Object_ServiceBay = GetHandle("unnamed_ibsbay");
 	Object_Carrier = GetHandle("unnamed_ivcarrs");
@@ -230,6 +235,27 @@ void EDF00Mission::Execute(void)
 	if (!m_DidOneTimeInit)
 		Init();
 
+	if (!m_PlayerCanMove)
+	{
+		VehicleControls controls;
+		controls.braccel = 0;
+		controls.strafe = 0;
+		controls.jump = 0;
+		controls.deploy = 0;
+		controls.eject = 0;
+		controls.abandon = 0;
+		controls.fire = 0;
+		SetControls(Object_Player, controls,
+			CTRL_BRACCEL +
+			CTRL_STRAFE +
+			CTRL_JUMP +
+			CTRL_DEPLOY +
+			CTRL_EJECT +
+			CTRL_ABANDON +
+			CTRL_FIRE
+			);
+	}
+
 	switch(m_convoyStateMachine)
 	{
 	case 0: // any special setup, could probably replace with 1 time init part
@@ -254,15 +280,20 @@ void EDF00Mission::Execute(void)
 		IFace_Activate("INFO1");
 		IFace_Activate("Start1");
 		m_convoyStateMachine++;
+		FreeCamera();
+		break;
 	case 4:
-//		if(CameraReady())
-//		{
-			FreeCamera();
+		if(CameraReady())
+		{
+			Vector pos = GetPosition(Object_Player);
+			Vector ang = GetFront(Object_Player);
+			pos.y += 3.0f;
+			SetCameraPosition(pos,ang);
 			IFace_Deactivate("Start1");
 			IFace_Activate("Message");
 			m_convoyStateMachine++;
-//		}
-//		break;
+		}
+		break;
 	case 5:
 		{
 			int ifaceVal = IFace_GetInteger("images.page");
@@ -275,61 +306,63 @@ void EDF00Mission::Execute(void)
 		IFace_Deactivate("Message");
 		IFace_Exec("mercedf1.cfg");
 		IFace_Activate("INFO");
+		m_convoyStateMachine++;
+	case 7:
 		Object_CarrierLaunchCamDummy = BuildObject("dummy",2,Position_LandingZone1);
-		Position_HardingNav1 = GetPosition(Object_HardingNav);
-		Position_ScoutSpawning2 = GetPosition(Object_Blue);
-		Position_ScoutSpawning1 = GetPosition(Object_Red);
-		RemoveObject(Object_HardingNav);
-		RemoveObject(Object_Blue);
-		RemoveObject(Object_Red);
+		//Position_HardingNav1 = GetPosition(Object_HardingNav);
+		//Position_ScoutSpawning2 = GetPosition(Object_Blue);
+		//Position_ScoutSpawning1 = GetPosition(Object_Red);
+		//RemoveObject(Object_HardingNav);
+		//RemoveObject(Object_Blue);
+		//RemoveObject(Object_Red);
 		Position_ServiceBay = GetPosition(Object_ServiceBay);
-		Position_LandingZone = GetPosition(Object_LandingZone);
-		RemoveObject(Object_LandingZone);
+		//Position_LandingZone = GetPosition(Object_LandingZone);
+		//RemoveObject(Object_LandingZone);
 		SetGroup(Object_WyndtEssex,10);
 		SetObjectiveName(Object_WyndtEssex,"Wyndt-Essex");
-		Object_Hardin = BuildObject("ivscout11",9,Position_HardingNav1);
+		//Object_Hardin = BuildObject(SCOUTODF,9,Position_HardingNav1);
+		Object_Hardin = BuildObject(SCOUTODF,9,"hardin_spawn");
+		//Object_Hardin = BuildObject(SCOUTODF,9,GetVectorFromPath("hardin_spawn"));
 		SetObjectiveName(Object_Hardin,"Hardin");
-		Object_Scout1 = BuildObject("ivscout11",9,Position_ScoutSpawning1);
-		Object_Scout2 = BuildObject("ivscout11",9,Position_ScoutSpawning1);
-		Object_Scout3 = BuildObject("ivscout11",9,Position_ScoutSpawning2);
-		Object_ServTruck1 = BuildObject("ivserv",1,Position_ScoutSpawning2);
+		Object_Scout1 = BuildObject(SCOUTODF,9,"red_spawn");
+		Object_Scout2 = BuildObject(SCOUTODF,9,"red_spawn");
+		Object_Scout3 = BuildObject(SCOUTODF,9,"blue_spawn");
+		Object_ServTruck1 = BuildObject(SERVODF,1,"blue_spawn");
 		SetGroup(Object_ServTruck1,10);
-		Position_LandingZone.x += 1;
-		Position_LandingZone.y += 1;
-		Position_LandingZone.z += 1;
-		Object_ServTruck2 = BuildObject("ivserv",9,Position_LandingZone);
-		Position_LandingZone.x += 10;
-		//Position_LandingZone.y += 0;
-		//Position_LandingZone.z += 0;
-		Object_Cargo1 = BuildObject("ivcargo",9,Position_LandingZone);
-		Position_LandingZone.x += -15;
-		//Position_LandingZone.y += 0;
-		//Position_LandingZone.z += 0;
-		Object_Cargo2 = BuildObject("ivcargo",9,Position_LandingZone);
-
+		{
+			Vector Position_LandingZone = GetVectorFromPath("landing_zone");
+			Position_LandingZone.x += 1;
+			Position_LandingZone.y += 1;
+			Position_LandingZone.z += 1;
+			Object_ServTruck2 = BuildObject(SERVODF,9,Position_LandingZone);
+			Position_LandingZone.x += 10;
+			//Position_LandingZone.y += 0;
+			//Position_LandingZone.z += 0;
+			Object_Cargo1 = BuildObject(CARGOODF,9,Position_LandingZone);
+			Position_LandingZone.x += -15;
+			//Position_LandingZone.y += 0;
+			//Position_LandingZone.z += 0;
+			Object_Cargo2 = BuildObject(CARGOODF,9,Position_LandingZone);
+		}
 		m_convoyStateMachine++;
 		break;
-	case 7:
+	case 8:
 		{
 			int ifaceVal = IFace_GetInteger("images.page");
 			if (ifaceVal == 3)
+			{
+				FreeFinish();
 				m_convoyStateMachine++;
+			}
 		}
 		break;
-	case 8:
-		Goto(Object_Cargo1,"convoy",1);
-		IFace_Deactivate("INFO");
-		FreeFinish();
-		m_convoyWaitTillTime = m_ElapsedGameTime + (1 * m_GameTPS);
-		m_convoyStateMachine++;
-		break;
 	case 9:
-		if (m_ElapsedGameTime >= m_convoyWaitTillTime)
+		if(CameraFinish())
 			m_convoyStateMachine++;
 		break;
 	case 10:
-		UpdateEarthQuake(4.0);
-		LookAt(Object_WyndtEssex,Object_Player,1);
+		IFace_Deactivate("INFO");
+		Goto(Object_Cargo1,"convoy",1);
 		m_convoyWaitTillTime = m_ElapsedGameTime + (1 * m_GameTPS);
 		m_convoyStateMachine++;
 		break;
@@ -338,8 +371,9 @@ void EDF00Mission::Execute(void)
 			m_convoyStateMachine++;
 		break;
 	case 12:
-		AudioMessage("mercury_02.wav");
-		m_convoyWaitTillTime = m_ElapsedGameTime + (9 * m_GameTPS); // maybe use "IsAudioMessageDone" instead?
+		UpdateEarthQuake(4.0);
+		LookAt(Object_WyndtEssex,Object_Player,1);
+		m_convoyWaitTillTime = m_ElapsedGameTime + (1 * m_GameTPS);
 		m_convoyStateMachine++;
 		break;
 	case 13:
@@ -347,6 +381,15 @@ void EDF00Mission::Execute(void)
 			m_convoyStateMachine++;
 		break;
 	case 14:
+		AudioMessage("mercury_02.wav");
+		m_convoyWaitTillTime = m_ElapsedGameTime + (9 * m_GameTPS); // maybe use "IsAudioMessageDone" instead?
+		m_convoyStateMachine++;
+		break;
+	case 15:
+		if (m_ElapsedGameTime >= m_convoyWaitTillTime)
+			m_convoyStateMachine++;
+		break;
+	case 16:
 		SetObjectiveOn(Object_Cargo2);
 		AddObjective(_Text1, WHITE);
 		StopEarthQuake();
@@ -354,6 +397,7 @@ void EDF00Mission::Execute(void)
 		StartAnimation(Object_Condor);
 		AudioMessage("dropdoor.wav");
 		RemoveObject(Object_Stayput);
+		m_PlayerCanMove = true;
 		Goto(Object_Scout2,"convoy",1);
 		Defend2(Object_WyndtEssex,Object_Cargo2,1);
 		Follow(Object_ServTruck1,Object_Cargo2,1);
@@ -365,25 +409,13 @@ void EDF00Mission::Execute(void)
 		m_convoyWaitTillTime = m_ElapsedGameTime + (5 * m_GameTPS); // maybe use "IsAudioMessageDone" instead?
 		m_convoyStateMachine++;
 		break;
-	case 15:
-		if (m_ElapsedGameTime >= m_convoyWaitTillTime)
-			m_convoyStateMachine++;
-		break;
-	case 16:
-		Goto(Object_Cargo2,"convoy",1);
-		m_convoyWaitTillTime = m_ElapsedGameTime + (30 * m_GameTPS); // maybe use "IsAudioMessageDone" instead?
-		m_convoyStateMachine++;
-		break;
 	case 17:
 		if (m_ElapsedGameTime >= m_convoyWaitTillTime)
 			m_convoyStateMachine++;
 		break;
 	case 18:
-		Object_Nadir1 = BuildObject("nadir",2,Position_LandingZone2);
-		SetPerceivedTeam(Object_Nadir1,1);
-		Attack(Object_Nadir1,Object_Cargo2,1);
-		AudioMessage("mercury_02a.wav");
-		m_convoyWaitTillTime = m_ElapsedGameTime + (13 * m_GameTPS); // maybe use "IsAudioMessageDone" instead?
+		Goto(Object_Cargo2,"convoy",1);
+		m_convoyWaitTillTime = m_ElapsedGameTime + (30 * m_GameTPS); // maybe use "IsAudioMessageDone" instead?
 		m_convoyStateMachine++;
 		break;
 	case 19:
@@ -391,12 +423,24 @@ void EDF00Mission::Execute(void)
 			m_convoyStateMachine++;
 		break;
 	case 20:
-		SetPerceivedTeam(Object_Nadir1,2);
+		Object_Nadir1 = BuildObject(DRONEODF,2,Position_LandingZone2);
+		SetPerceivedTeam(Object_Nadir1,1);
+		Attack(Object_Nadir1,Object_Cargo2,1);
+		AudioMessage("mercury_02a.wav");
+		m_convoyWaitTillTime = m_ElapsedGameTime + (13 * m_GameTPS); // maybe use "IsAudioMessageDone" instead?
 		m_convoyStateMachine++;
 		break;
 	case 21:
+		if (m_ElapsedGameTime >= m_convoyWaitTillTime)
+			m_convoyStateMachine++;
+		break;
+	case 22:
+		SetPerceivedTeam(Object_Nadir1,2);
+		m_convoyStateMachine++;
+		break;
+	case 23:
 		{
-			Dist dist = GetDistance(Object_ConvoyHalt,Object_Cargo2);
+			Dist dist = GetDistance(Object_Cargo2,"convoy_halt");
 			if (dist <= 50)
 			{
 				SetObjectiveOff(Object_Cargo2);
@@ -406,18 +450,18 @@ void EDF00Mission::Execute(void)
 			}
 		}
 		break;
-	case 22:
+	case 24:
 		if (m_ElapsedGameTime >= m_convoyWaitTillTime)
 			m_convoyStateMachine++;
 		break;
-	case 23:
+	case 25:
 		ClearObjectives();
 		AddObjective(_Text2,WHITE);
 		m_runPowerAIStateMachine = true;
 		m_runPowerPlayerStateMachine = true;
 		m_convoyStateMachine++;
 		break;
-	case 24:
+	case 26:
 		{
 			TeamNum radar1 = GetTeamNum(Object_Radar1);
 			TeamNum radar2 = GetTeamNum(Object_Radar2);
@@ -436,16 +480,16 @@ void EDF00Mission::Execute(void)
 			}
 		}
 		break;
-	case 25:
+	case 27:
 		if (m_ElapsedGameTime >= m_convoyWaitTillTime)
 			m_convoyStateMachine++;
 		break;
-	case 26:
+	case 28:
 		AudioMessage("mercury_07.wav");
 		AddObjective(_Text11,WHITE);
 		m_convoyStateMachine++;
 		break;
-	case 27:
+	case 29:
 		if(m_ConvoyContinueToBase)
 		{
 			Goto(Object_Hardin,"hardin",1);
@@ -453,30 +497,30 @@ void EDF00Mission::Execute(void)
 			m_convoyStateMachine++;
 		}
 		break;
-	case 28:
-		if (m_ElapsedGameTime >= m_convoyWaitTillTime)
-			m_convoyStateMachine++;
-		break;
-	case 29:
-		Goto(Object_WyndtEssex,"hardin",1);
-		m_convoyWaitTillTime = m_ElapsedGameTime + (5 * m_GameTPS);
-		m_convoyStateMachine++;
 	case 30:
 		if (m_ElapsedGameTime >= m_convoyWaitTillTime)
 			m_convoyStateMachine++;
 		break;
 	case 31:
-		Goto(Object_Cargo1,"transport1",1);
-		m_convoyWaitTillTime = m_ElapsedGameTime + (10 * m_GameTPS);
+		Goto(Object_WyndtEssex,"hardin",1);
+		m_convoyWaitTillTime = m_ElapsedGameTime + (5 * m_GameTPS);
 		m_convoyStateMachine++;
 	case 32:
 		if (m_ElapsedGameTime >= m_convoyWaitTillTime)
 			m_convoyStateMachine++;
 		break;
 	case 33:
-		Goto(Object_Cargo2,"transport1",1);
+		Goto(Object_Cargo1,"transport1",1);
+		m_convoyWaitTillTime = m_ElapsedGameTime + (10 * m_GameTPS);
 		m_convoyStateMachine++;
 	case 34:
+		if (m_ElapsedGameTime >= m_convoyWaitTillTime)
+			m_convoyStateMachine++;
+		break;
+	case 35:
+		Goto(Object_Cargo2,"transport1",1);
+		m_convoyStateMachine++;
+	case 36:
 		{
 			Dist d1 = GetDistance(Object_Cargo1,Object_ServiceBay);
 			Dist d2 = GetDistance(Object_Cargo2,Object_ServiceBay);
@@ -510,7 +554,7 @@ void EDF00Mission::Execute(void)
 			}
 		}
 		break;
-	case 35:
+	case 37:
 		Object_Player = GetPlayerHandle();
 		{
 			Dist dist = GetDistance(Object_Hardin,Object_Player);
@@ -518,7 +562,7 @@ void EDF00Mission::Execute(void)
 				m_convoyStateMachine++;
 		}
 		break;
-	case 36:
+	case 38:
 		Goto(Object_WyndtEssex,Object_ServiceBay,1);
 		Goto(Object_Scout2,Object_ServiceBay,1);
 		Goto(Object_Scout3,Object_ServiceBay,1);
@@ -529,7 +573,7 @@ void EDF00Mission::Execute(void)
 		SetObjectiveOff(Object_Hardin);
 		m_convoyStateMachine++;
 		break;
-	case 37:
+	case 39:
 		Object_Player = GetPlayerHandle();
 		{
 			Dist dist = GetDistance(Object_Corbernav,Object_Player);
@@ -537,7 +581,7 @@ void EDF00Mission::Execute(void)
 				m_convoyStateMachine++;
 		}
 		break;
-	case 38:
+	case 40:
 		StartEarthQuake(4.0);
 		m_CerbRoutine = false;
 		ClearObjectives();
@@ -549,12 +593,12 @@ void EDF00Mission::Execute(void)
 		m_convoyWaitTillTime = m_ElapsedGameTime + (3 * m_GameTPS);
 		m_convoyStateMachine++;
 		break;
-	case 39:
+	case 41:
 		if (m_ElapsedGameTime >= m_convoyWaitTillTime)
 			m_convoyStateMachine++;
 		break;
-	case 40:
-		Object_HardingNav = BuildObject("ibnav",2,Position_HardingNav2);
+	case 42:
+		//Object_HardingNav = BuildObject("ibnav",2,Position_HardingNav2);
 		RemoveObject(Object_Cargo1);
 		RemoveObject(Object_Cargo2);
 		m_Routine4Enable = true;
@@ -567,22 +611,13 @@ void EDF00Mission::Execute(void)
 		m_convoyWaitTillTime = m_ElapsedGameTime + (7 * m_GameTPS);
 		m_convoyStateMachine++;
 		break;
-	case 41:
-		if (m_ElapsedGameTime >= m_convoyWaitTillTime)
-			m_convoyStateMachine++;
-		break;
-	case 42:
-		AudioMessage("dropleav.wav");
-		m_convoyWaitTillTime = m_ElapsedGameTime + (10 * m_GameTPS);
-		m_convoyStateMachine++;
-		break;
 	case 43:
 		if (m_ElapsedGameTime >= m_convoyWaitTillTime)
 			m_convoyStateMachine++;
 		break;
 	case 44:
-		AudioMessage("mercury_09.wav");
-		m_convoyWaitTillTime = m_ElapsedGameTime + (12 * m_GameTPS);
+		AudioMessage("dropleav.wav");
+		m_convoyWaitTillTime = m_ElapsedGameTime + (10 * m_GameTPS);
 		m_convoyStateMachine++;
 		break;
 	case 45:
@@ -590,6 +625,15 @@ void EDF00Mission::Execute(void)
 			m_convoyStateMachine++;
 		break;
 	case 46:
+		AudioMessage("mercury_09.wav");
+		m_convoyWaitTillTime = m_ElapsedGameTime + (12 * m_GameTPS);
+		m_convoyStateMachine++;
+		break;
+	case 47:
+		if (m_ElapsedGameTime >= m_convoyWaitTillTime)
+			m_convoyStateMachine++;
+		break;
+	case 48:
 		{
 			Matrix mat = Matrix();
 			GetPosition(Object_Carrier, mat);
@@ -599,11 +643,11 @@ void EDF00Mission::Execute(void)
 		m_convoyWaitTillTime = m_ElapsedGameTime + (12 * m_GameTPS);
 		m_convoyStateMachine++;
 		break;
-	case 47:
+	case 49:
 		if (m_ElapsedGameTime >= m_convoyWaitTillTime)
 			m_convoyStateMachine++;
 		break;
-	case 48:
+	case 50:
 		StopEarthQuake();
 		SucceedMission(0,"winmerc.des");
 		break;
@@ -623,7 +667,8 @@ void EDF00Mission::Execute(void)
 			break;
 		case 2:
 			{
-				Dist dist = GetDistance(Object_Scout1,Object_Krudernav);
+				//Dist dist = GetDistance(Object_Scout1,Object_Krudernav);
+				Dist dist = GetDistance(Object_Scout1,"red_goto_power");
 				if(dist <= 20)
 					m_powerAIStateMachine++;
 			}
@@ -680,10 +725,10 @@ void EDF00Mission::Execute(void)
 			SetObjectiveOn(Object_WyndtEssex);
 			LookAt(Object_WyndtEssex,Object_Player,1);
 			AudioMessage("mercury_04.wav"); // Essex >> Follow me leutenent
-			Object_Nadir1 = BuildObject("nadir",2,Position_LandingZone2);
+			Object_Nadir1 = BuildObject(DRONEODF,2,Position_LandingZone2);
 			Attack(Object_Nadir1,Object_WyndtEssex,1);
-			Position_Rodnav2 = GetPosition(Object_Rodnav2);
-			Object_NavForCerbUnit = BuildObject("ibnav",4,Position_NavForCerbUnit);
+			//Position_Rodnav2 = GetPosition(Object_Rodnav2);
+			//Object_NavForCerbUnit = BuildObject("ibnav",4,Position_NavForCerbUnit);
 			Goto(Object_WyndtEssex,"rod1",1);
 			SetMaxHealth(Object_Power1,800);
 			SetMaxHealth(Object_Power2,800);
@@ -693,7 +738,8 @@ void EDF00Mission::Execute(void)
 			break;
 		case 2:
 			{
-				Dist dist = GetDistance(Object_WyndtEssex,Object_Rodnav1);
+				//Dist dist = GetDistance(Object_WyndtEssex,Object_Rodnav1);
+				Dist dist = GetDistance(Object_WyndtEssex,"blue_goto_power_1");
 				if(dist <= 20)
 					m_powerPlayerStateMachine++;
 			}
@@ -727,7 +773,8 @@ void EDF00Mission::Execute(void)
 				m_powerPlayerStateMachine++;
 			break;
 		case 8:
-			Goto(Object_WyndtEssex,Object_Rodnav2,1);
+			//Goto(Object_WyndtEssex,Object_Rodnav2,1);
+			Goto(Object_WyndtEssex,"blue_goto_power_2",1);
 			ClearObjectives();
 			AddObjective(_Text3,GREEN);
 			AddObjective(_Text4,WHITE);
@@ -739,7 +786,8 @@ void EDF00Mission::Execute(void)
 				m_powerPlayerStateMachine++;
 			break;
 		case 10:
-			SetVectorPosition(Object_WyndtEssex,Position_Rodnav2);
+			//SetVectorPosition(Object_WyndtEssex,Position_Rodnav2);
+			SetPosition(Object_WyndtEssex,"blue_goto_power_2");
 			m_powerPlayerStateMachine++;
 			break;
 		case 11:
@@ -755,8 +803,8 @@ void EDF00Mission::Execute(void)
 			AddObjective(_Text2,WHITE);
 			AudioMessage("mercury_06.wav");
 			Goto(Object_WyndtEssex,"path_1",1);
-			Object_Nadir1 = BuildObject("nadir",2,Position_LandingZone2);
-			Object_Nadir2 = BuildObject("nadir",2,Position_LandingZone2);
+			Object_Nadir1 = BuildObject(DRONEODF,2,Position_LandingZone2);
+			Object_Nadir2 = BuildObject(DRONEODF,2,Position_LandingZone2);
 			Object_Player = GetPlayerHandle();
 			Attack(Object_Nadir1,Object_WyndtEssex,1);
 			Attack(Object_Nadir2,Object_Player,1);
@@ -764,7 +812,8 @@ void EDF00Mission::Execute(void)
 			break;
 		case 13:
 			{
-				Dist dist = GetDistance(Object_ConvoyHalt,Object_WyndtEssex);
+				//Dist dist = GetDistance(Object_ConvoyHalt,Object_WyndtEssex);
+				Dist dist = GetDistance(Object_WyndtEssex,"convoy_halt");
 				if(dist <= 50)
 					m_powerPlayerStateMachine++;
 			}
@@ -790,9 +839,9 @@ void EDF00Mission::Execute(void)
 			break;
 		case 16:
 			Object_Player = GetPlayerHandle();
-			Object_Nadir1 = BuildObject("nadir",2,Position_LandingZone2);
-			Object_Nadir2 = BuildObject("nadir",2,Position_LandingZone2);
-			Object_Nadir3 = BuildObject("nadir",2,Position_LandingZone2);
+			Object_Nadir1 = BuildObject(DRONEODF,2,Position_LandingZone2);
+			Object_Nadir2 = BuildObject(DRONEODF,2,Position_LandingZone2);
+			Object_Nadir3 = BuildObject(DRONEODF,2,Position_LandingZone2);
 			Attack(Object_Nadir1,Object_WyndtEssex,1);
 			Attack(Object_Nadir2,Object_Cargo2,1);
 			Attack(Object_Nadir3,Object_Player,1);
@@ -815,10 +864,10 @@ void EDF00Mission::Execute(void)
 				m_powerPlayerStateMachine++;
 			break;
 		case 21: // repeated attack wave spawn
-			Object_Nadir1 = BuildObject("nadir",2,Position_LandingZone2);
-			Object_Nadir2 = BuildObject("nadir",2,Position_LandingZone2);
-			Object_Nadir3 = BuildObject("nadir",2,Position_LandingZone2);
-			Object_Nadir4 = BuildObject("nadir",2,Position_LandingZone2);
+			Object_Nadir1 = BuildObject(DRONEODF,2,Position_LandingZone2);
+			Object_Nadir2 = BuildObject(DRONEODF,2,Position_LandingZone2);
+			Object_Nadir3 = BuildObject(DRONEODF,2,Position_LandingZone2);
+			Object_Nadir4 = BuildObject(DRONEODF,2,Position_LandingZone2);
 			Attack(Object_Nadir1,Object_Player,1);
 			Attack(Object_Nadir2,Object_Player,1);
 			Goto(Object_Nadir3,"hardin",1);
@@ -852,7 +901,7 @@ void EDF00Mission::Execute(void)
 		switch(m_Routine4StateMachine)
 		{
 		case 0:
-			SetVectorPosition(Object_Player,Position_LandingZone0);
+			//SetVectorPosition(Object_Player,Position_LandingZone0);
 			m_runPowerPlayerStateMachine = false;
 			m_Routine4StateMachine++;
 		case 1:
@@ -864,7 +913,7 @@ void EDF00Mission::Execute(void)
 				m_Routine4StateMachine++;
 			break;
 		case 3:
-			CameraObject(Object_HardingNav,Position_CarrierLaunchCamDummy.x,Position_CarrierLaunchCamDummy.y,Position_CarrierLaunchCamDummy.z,Object_CarrierLaunchCamDummy);
+			//CameraObject(Object_HardingNav,Position_CarrierLaunchCamDummy.x,Position_CarrierLaunchCamDummy.y,Position_CarrierLaunchCamDummy.z,Object_CarrierLaunchCamDummy);
 			m_Routine4WaitTillTime = m_ElapsedGameTime + (27 * m_GameTPS);
 			m_Routine4StateMachine++;
 		case 4:
@@ -885,7 +934,8 @@ void EDF00Mission::Execute(void)
 		case 0:
 			m_CerbStateMachine++;
 		case 1:
-			Object_CerbUnit = BuildObject("cvscout10",4,Position_Rodnav2);
+			//Object_CerbUnit = BuildObject("cvscout10",4,Position_Rodnav2);
+			Object_CerbUnit = BuildObject("cvscout10",4,"blue_goto_power_2");
 			SetObjectiveName(Object_CerbUnit,"Unknown");
 			Goto(Object_CerbUnit,Object_Gun10,1);
 			m_CerbWaitTillTime = m_ElapsedGameTime + (8 * m_GameTPS);
@@ -899,7 +949,8 @@ void EDF00Mission::Execute(void)
 			m_CerbStateMachine++;
 		case 4:
 			{
-				Dist dist = GetDistance(Object_CerbUnit,Object_NavForCerbUnit);
+				//Dist dist = GetDistance(Object_CerbUnit,Object_NavForCerbUnit);
+				Dist dist = GetDistance(Object_CerbUnit,"path_2",3);
 				if(dist <= 100)
 				{
 					m_CerbStateMachine = 7;
@@ -916,8 +967,6 @@ void EDF00Mission::Execute(void)
 		case 5:
 			{
 				Dist dist = GetDistance(Object_CerbUnit,"path_2",3);
-				sprintf_s(TempMsgString, "Dist: %f", dist);
-				PrintConsoleMessage(TempMsgString);
 				if(dist <= 10)
 				{
 					m_CerbStateMachine = 7;
@@ -985,6 +1034,37 @@ void EDF00Mission::Execute(void)
 
 	m_ElapsedGameTime++;
 }
+
+Vector EDF00Mission::GetVectorFromPath(Name path, int point)
+{
+	Vector retVal;
+	size_t bufSize = 0;
+	float* pData = NULL;
+	GetPathPoints(path, bufSize, pData);
+	if(point >= UnsignedToSigned(bufSize))
+		return Vector();
+	pData = new float[2 * bufSize];
+	if(GetPathPoints(path, bufSize, pData))
+		retVal = Vector(pData[2*point+0], TerrainFindFloor(pData[2*point+0], pData[2*point+1]), pData[2*point+1]);
+	delete[] pData;
+	return retVal;
+}
+
+int EDF00Mission::UnsignedToSigned(unsigned int x)
+{
+    if (x <= INT_MAX)
+        return static_cast<int>(x);
+
+    //if (x >= INT_MIN)
+	#pragma warning( push )
+	#pragma warning( disable : 4308)
+	if (x > INT_MIN - 1u) // MS compiler likes this more
+	#pragma warning( pop ) 
+        return static_cast<int>(x - INT_MIN) + INT_MIN;
+
+    throw x; // Or whatever else you like
+}
+
 DLLBase * BuildMission(void)
 {
 	return new EDF00Mission();

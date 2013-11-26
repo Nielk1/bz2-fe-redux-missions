@@ -46,6 +46,7 @@ public:
 		m_CerbRoutine,
 		m_PreventPowerDamage,
 		m_SetGun10Heath,
+		m_PlayerCanMove,
 		b_last;
 
 	// floats
@@ -58,11 +59,11 @@ public:
 		h_first,
 		Object_Player,
 		Object_CarrierLaunchCamDummy,
-		Object_LandingZone,
-		Object_ConvoyHalt,
-		Object_HardingNav,
-		Object_Red,
-		Object_Blue,
+		//Object_LandingZone,
+		//Object_ConvoyHalt,
+		//Object_HardingNav,
+		//Object_Red,
+		//Object_Blue,
 		Object_Radar1,
 		Object_Radar2,
 		Object_Gun1,
@@ -96,10 +97,10 @@ public:
 		Object_Power5,
 		Object_Power6,
 		Object_Power7,
-		Object_Krudernav,
-		Object_Rodnav1,
-		Object_Rodnav2,
-		Object_NavForCerbUnit,
+		//Object_Krudernav,
+		//Object_Rodnav1,
+		//Object_Rodnav2,
+		//Object_NavForCerbUnit,
 		Object_Nadir1,
 		Object_Nadir2,
 		Object_Nadir3,
@@ -126,15 +127,15 @@ public:
 		v_first,
 		Position_LandingZone3,
 		Position_LandingZone1,
-		Position_LandingZone0,
-		Position_HardingNav1,
-		Position_HardingNav2,
-		Position_ScoutSpawning2,
-		Position_ScoutSpawning1,
+		//Position_LandingZone0,
+		//Position_HardingNav1,
+		//Position_HardingNav2,
+		//Position_ScoutSpawning2,
+		//Position_ScoutSpawning1,
 		Position_ServiceBay,
-		Position_LandingZone,
+		//Position_LandingZone,
 		Position_LandingZone2,
-		Position_Rodnav2,
+		//Position_Rodnav2,
 		Position_NavForCerbUnit,
 		Position_CarrierLaunchCamDummy,
 		v_last;
@@ -164,6 +165,9 @@ private:
 	int m_powerPlayerStateMachineLast;
 	int m_Routine4StateMachineLast;
 	int m_CerbStateMachineLast;
+
+	Vector GetVectorFromPath(Name path, int point = 0);
+	int UnsignedToSigned(unsigned int x);
 };
 
 #endif // MERCEDF1_H__
