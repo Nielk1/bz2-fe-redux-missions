@@ -134,7 +134,7 @@ public:
 		//Position_ScoutSpawning1,
 		Position_ServiceBay,
 		//Position_LandingZone,
-		Position_LandingZone2,
+		//Position_LandingZone2,
 		//Position_Rodnav2,
 		Position_NavForCerbUnit,
 		Position_CarrierLaunchCamDummy,

@@ -42,8 +42,9 @@ void EDF00Mission::Init(void)
 
 	m_DidOneTimeInit = true;
 
-	Position_LandingZone1 = Vector(-674.0f,1000.0f,-783.0f);
-	Position_CarrierLaunchCamDummy = Vector(-674.0f,80.0f,-782.0f);
+	// TODO: revisit the camera code, get rid of these hard coded vectors
+	//Position_LandingZone1 = Vector(-674.0f,1000.0f,-783.0f);
+	//Position_CarrierLaunchCamDummy = Vector(-674.0f,80.0f,-782.0f);
 	//m_Gravity = GetVarItemInt("network.session.ivar31");
 	// Set this for the server now. Clients get this set from Load().
 	//SetGravity(static_cast<float>(m_Gravity) * 0.5f);
@@ -306,8 +307,7 @@ void EDF00Mission::Execute(void)
 		IFace_Deactivate("Message");
 		IFace_Exec("mercedf1.cfg");
 		IFace_Activate("INFO");
-		m_convoyStateMachine++;
-	case 7:
+
 		Object_CarrierLaunchCamDummy = BuildObject("dummy",2,Position_LandingZone1);
 		//Position_HardingNav1 = GetPosition(Object_HardingNav);
 		//Position_ScoutSpawning2 = GetPosition(Object_Blue);
@@ -346,7 +346,7 @@ void EDF00Mission::Execute(void)
 		}
 		m_convoyStateMachine++;
 		break;
-	case 8:
+	case 7:
 		{
 			int ifaceVal = IFace_GetInteger("images.page");
 			if (ifaceVal == 3)
@@ -355,6 +355,9 @@ void EDF00Mission::Execute(void)
 				m_convoyStateMachine++;
 			}
 		}
+		break;
+	case 8:
+		m_convoyStateMachine++;
 		break;
 	case 9:
 		if(CameraFinish())
@@ -423,7 +426,7 @@ void EDF00Mission::Execute(void)
 			m_convoyStateMachine++;
 		break;
 	case 20:
-		Object_Nadir1 = BuildObject(DRONEODF,2,Position_LandingZone2);
+		Object_Nadir1 = BuildObject(DRONEODF,2,"NadirAttackSpawn");
 		SetPerceivedTeam(Object_Nadir1,1);
 		Attack(Object_Nadir1,Object_Cargo2,1);
 		AudioMessage("mercury_02a.wav");
@@ -721,11 +724,11 @@ void EDF00Mission::Execute(void)
 			break;
 		case 1:
 			Object_Player = GetPlayerHandle();
-			SetCurHealth(Object_Gun10,20000);
+			SetCurHealth(Object_Gun10,3000);
 			SetObjectiveOn(Object_WyndtEssex);
 			LookAt(Object_WyndtEssex,Object_Player,1);
 			AudioMessage("mercury_04.wav"); // Essex >> Follow me leutenent
-			Object_Nadir1 = BuildObject(DRONEODF,2,Position_LandingZone2);
+			Object_Nadir1 = BuildObject(DRONEODF,2,"NadirAttackSpawn");
 			Attack(Object_Nadir1,Object_WyndtEssex,1);
 			//Position_Rodnav2 = GetPosition(Object_Rodnav2);
 			//Object_NavForCerbUnit = BuildObject("ibnav",4,Position_NavForCerbUnit);
@@ -803,8 +806,8 @@ void EDF00Mission::Execute(void)
 			AddObjective(_Text2,WHITE);
 			AudioMessage("mercury_06.wav");
 			Goto(Object_WyndtEssex,"path_1",1);
-			Object_Nadir1 = BuildObject(DRONEODF,2,Position_LandingZone2);
-			Object_Nadir2 = BuildObject(DRONEODF,2,Position_LandingZone2);
+			Object_Nadir1 = BuildObject(DRONEODF,2,"NadirAttackSpawn");
+			Object_Nadir2 = BuildObject(DRONEODF,2,"NadirAttackSpawn");
 			Object_Player = GetPlayerHandle();
 			Attack(Object_Nadir1,Object_WyndtEssex,1);
 			Attack(Object_Nadir2,Object_Player,1);
@@ -839,9 +842,9 @@ void EDF00Mission::Execute(void)
 			break;
 		case 16:
 			Object_Player = GetPlayerHandle();
-			Object_Nadir1 = BuildObject(DRONEODF,2,Position_LandingZone2);
-			Object_Nadir2 = BuildObject(DRONEODF,2,Position_LandingZone2);
-			Object_Nadir3 = BuildObject(DRONEODF,2,Position_LandingZone2);
+			Object_Nadir1 = BuildObject(DRONEODF,2,"NadirAttackSpawn");
+			Object_Nadir2 = BuildObject(DRONEODF,2,"NadirAttackSpawn");
+			Object_Nadir3 = BuildObject(DRONEODF,2,"NadirAttackSpawn");
 			Attack(Object_Nadir1,Object_WyndtEssex,1);
 			Attack(Object_Nadir2,Object_Cargo2,1);
 			Attack(Object_Nadir3,Object_Player,1);
@@ -864,10 +867,10 @@ void EDF00Mission::Execute(void)
 				m_powerPlayerStateMachine++;
 			break;
 		case 21: // repeated attack wave spawn
-			Object_Nadir1 = BuildObject(DRONEODF,2,Position_LandingZone2);
-			Object_Nadir2 = BuildObject(DRONEODF,2,Position_LandingZone2);
-			Object_Nadir3 = BuildObject(DRONEODF,2,Position_LandingZone2);
-			Object_Nadir4 = BuildObject(DRONEODF,2,Position_LandingZone2);
+			Object_Nadir1 = BuildObject(DRONEODF,2,"NadirAttackSpawn");
+			Object_Nadir2 = BuildObject(DRONEODF,2,"NadirAttackSpawn");
+			Object_Nadir3 = BuildObject(DRONEODF,2,"NadirAttackSpawn");
+			Object_Nadir4 = BuildObject(DRONEODF,2,"NadirAttackSpawn");
 			Attack(Object_Nadir1,Object_Player,1);
 			Attack(Object_Nadir2,Object_Player,1);
 			Goto(Object_Nadir3,"hardin",1);
