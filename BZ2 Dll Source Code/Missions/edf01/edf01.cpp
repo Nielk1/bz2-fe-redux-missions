@@ -343,7 +343,7 @@ void EDF01Mission::Execute(void)
 			}
 		}
 		break;
-	case 10:
+	case 10: // LOC_72
 		if (m_ElapsedGameTime >= m_mainWaitTillTime)
 			m_mainStateMachine++;
 		break;
@@ -501,115 +501,214 @@ void EDF01Mission::Execute(void)
 		}
 	}
 
+	switch(m_Routine2StateMachine) // _Routine2
+	{
+	case 0:
+		m_Routine2WaitTillTime = m_ElapsedGameTime + (40 * m_GameTPS);
+		m_Routine2StateMachine++;
+	case 1:
+		if (m_ElapsedGameTime >= m_Routine2WaitTillTime)
+			m_Routine2StateMachine++;
+		break;
+	case 2:
+		Object_Observer1 = BuildObject("evtank",5,"Observer1");
+		LookAt(Object_Observer1,Object_Player,0);
+		Object_Observer2 = BuildObject("evtank",5,"Observer2");
+		LookAt(Object_Observer2,Object_Player,0);
+		m_Routine2WaitTillTime = m_ElapsedGameTime + (10 * m_GameTPS);
+		m_Routine2StateMachine++;
+	case 3:
+		if (m_ElapsedGameTime >= m_Routine2WaitTillTime)
+			m_Routine2StateMachine++;
+		break;
+	case 4:
+		RemoveObject(Object_APC1);
+		RemoveObject(Object_APC2);
+		m_Routine2StateMachine++;
+		break;
+	case 5:
+		if(m_ElapsedGameTime > (200 * m_GameTPS))
+		{
+			m_Routine2StateMachine = 1337; // LOC_150
+		}else if(Variable_PowerSourceNumber >= 1)
+		{
+			m_Routine2StateMachine++;
+		}
+		break;
+	case 6:
+		if(m_ElapsedGameTime > (200 * m_GameTPS))
+		{
+			m_Routine2StateMachine = 7;
+		}else if(GetTeamNum(GetWhoShotMe(Object_Observer1)) == 1)
+		{
+			m_Routine2StateMachine = 7;
+		}else if(GetTeamNum(GetWhoShotMe(Object_Observer2)) == 1)
+		{
+			m_Routine2StateMachine = 7;
+		}
+		else if(Variable_ScannedPercent >= 45)
+		{
+			m_Routine2StateMachine++;
+		}
+		break;
+	case 7:
+		m_Routine2WaitTillTime = m_ElapsedGameTime + (4 * m_GameTPS);
+		m_Routine2StateMachine++;
+		break;
+	case 8:
+		if (m_ElapsedGameTime >= m_Routine2WaitTillTime)
+			m_Routine2StateMachine++;
+		break;
+	case 9:
+		AudioMessage("edf01_04.wav");
+		SetPerceivedTeam(Object_Player,1);
+		SetPerceivedTeam(Object_Buddy1,1);
+		SetPerceivedTeam(Object_Buddy2,1);
+		Attack(Object_Observer1,Object_Buddy1,0);
+		Attack(Object_Observer2,Object_Buddy2,0);
+		SetPerceivedTeam(Object_Buddy1,1);
+		SetPerceivedTeam(Object_Buddy2,1);
+		SetPerceivedTeam(Object_Buddy3,1);
+		SetPerceivedTeam(Object_Buddy4,1);
+		SetPerceivedTeam(Object_Buddy5,1);
+		SetPerceivedTeam(Object_Buddy6,1);
+		ClearObjectives();
+		AddObjective(_Text2,WHITE);
+		m_Routine2WaitTillTime = m_ElapsedGameTime + (4 * m_GameTPS);
+		m_Routine2StateMachine++;
+		break;
+	case 10:
+		if (m_ElapsedGameTime >= m_Routine2WaitTillTime)
+			m_Routine2StateMachine++;
+		break;
+	case 11:
+		SetGroup(Object_Buddy1,0);
+		Stop(Object_Buddy1,0);
+		SetGroup(Object_Buddy2,0);
+		Stop(Object_Buddy2,0);
+		SetGroup(Object_Buddy3,0);
+		Stop(Object_Buddy3,0);
+		SetGroup(Object_Buddy4,0);
+		Stop(Object_Buddy4,0);
+		SetGroup(Object_Buddy5,0);
+		Stop(Object_Buddy5,0);
+		SetGroup(Object_Buddy6,0);
+		Stop(Object_Buddy6,0);
+		SetObjectiveOff(Object_CurrentPowerSource);
+		m_Routine2StateMachine++;
+	case 12:
+		if(!IsAliveAndPilot2(Object_Observer1)
+		&& GetTeamNum(Object_Observer1) != 5
+		&& !IsAliveAndPilot2(Object_Observer2)
+		&& GetTeamNum(Object_Observer2) != 5)
+			m_Routine2StateMachine++;
+		break;
+	case 13:
+		m_mainStateMachine = 10; // SetStep,_Routine1,LOC_72
+		//RunSpeed,_Routine1,1,true,true
+		//RunSpeed,_Routine5,8,true
+		//RunSpeed,_Routine7,3,true
+		//RunSpeed,_Routine6,1,true
+		//RunSpeed,_Routine9,1,true
+		m_Routine2WaitTillTime = m_ElapsedGameTime + (7 * m_GameTPS);
+		m_Routine2StateMachine++;
+	case 14:
+		if (m_ElapsedGameTime >= m_Routine2WaitTillTime)
+			m_Routine2StateMachine++;
+		break;
+	case 15:
+		AudioMessage("edf01_05.wav");
+		m_Routine2WaitTillTime = m_ElapsedGameTime + (14 * m_GameTPS);
+		m_Routine2StateMachine++;
+	case 16:
+		if (m_ElapsedGameTime >= m_Routine2WaitTillTime)
+			m_Routine2StateMachine++;
+		break;
+	case 17:
+		AudioMessage("edf01_05A.wav");
+		Object_SurvivorDropoff = BuildObject("ibnav",1,"SafeNav");
+		SetObjectiveName(Object_SurvivorDropoff,"Survivor Dropoff");
+		SetObjectiveOn(Object_SurvivorDropoff);
+		Object_TmpForChecks = BuildObject("ibnav",1,"SurvivorNav1");
+		SetObjectiveName(Object_TmpForChecks,"Survivors");
+		SetObjectiveOn(Object_TmpForChecks);
+		Object_TmpForChecks = BuildObject("ibnav",1,"SurvivorNav2");
+		SetObjectiveName(Object_TmpForChecks,"Survivors");
+		SetObjectiveOn(Object_TmpForChecks);
+		Object_TmpForChecks = BuildObject("evscout",5,"Enemy2");
+		Object_TmpForChecks = BuildObject("evscout",5,"Enemy3");
+		m_Routine2WaitTillTime = m_ElapsedGameTime + (140 * m_GameTPS);
+		m_Routine2StateMachine++;
+	case 18:
+		if (m_ElapsedGameTime >= m_Routine2WaitTillTime)
+			m_Routine2StateMachine++;
+		break;
+	case 19: // LOC_209:
+		Object_Player = GetPlayerHandle();
+		{
+			Dist dist = GetDistance(Object_DropShip,Object_Player);
+			if(dist >= 200)
+				m_Routine2StateMachine++;
+		}
+		break;
+	case 20:
+		Object_TmpForChecks = BuildObject("evturr",5,"TurretSpawn");
+		Goto(Object_TmpForChecks,"Turret1",1);
+		Object_TmpForChecks = BuildObject("evturr",5,"TurretSpawn");
+		Goto(Object_TmpForChecks,"Turret2",1);
+		Object_TmpForChecks = BuildObject("evturr",5,"TurretSpawn");
+		Goto(Object_TmpForChecks,"Turret3",1);
+		Stop(Object_FriendTurret3,0);
+		Stop(Object_FriendTurret2,0);
+		Object_TmpForChecks = BuildObject("ivserv",1,"Buddy4");
+		SetGroup(Object_TmpForChecks,2);
+		Object_TmpForChecks = BuildObject("ivserv",1,"Buddy5");
+		SetGroup(Object_TmpForChecks,3);
+		Object_TmpForChecks = BuildObject("ivserv",1,"Buddy6");
+		SetGroup(Object_TmpForChecks,4);
+		AudioMessage("edf01_05B.wav");
+		m_Routine2StateMachine++;
+		break;
+	}
 /*
 //--------------------------------------------------------------------
-[routine,_Routine2,1,true]
-	Wait,40
-	Createp,Object_Observer1,"evtank",5,"Observer1"
-	LookAt,Object_Observer1,Object_Player,0
-	Createp,Object_Observer2,"evtank",5,"Observer2"
-	LookAt,Object_Observer2,Object_Player,0
-	Wait,10
-	Remove,Object_APC1
-	Remove,Object_APC2
-LOC_136:
-	GetTime
-	IfGT,200,LOC_150
-	Add,Variable_PowerSourceNumber,0
-	IfLT,1,LOC_136
-LOC_140:
-	GetTime
-	IfGT,200,LOC_150
-	ShotBy,Object_TmpForChecks,Object_Observer1
-	GetTeam,Object_TmpForChecks
-	IfEQ,1,LOC_150
-	ShotBy,Object_TmpForChecks,Object_Observer2
-	GetTeam,Object_TmpForChecks
-	IfEQ,1,LOC_150
-	Add,Variable_ScannedPercent,0
-	IfLT,45,LOC_140
-LOC_150:
-	Wait,4
-	Audio,"edf01_04.wav"
-	SetPTeam,Object_Player,1
-	SetPTeam,Object_Buddy1,1
-	SetPTeam,Object_Buddy2,1
-	Attack,Object_Observer1,Object_Buddy1,0
-	Attack,Object_Observer2,Object_Buddy2,0
-	SetPTeam,Object_Buddy1,1
-	SetPTeam,Object_Buddy2,1
-	SetPTeam,Object_Buddy3,1
-	SetPTeam,Object_Buddy4,1
-	SetPTeam,Object_Buddy5,1
-	SetPTeam,Object_Buddy6,1
-	Clear
-	Display,_Text2,white
-	Wait,4
-	SetGroup,Object_Buddy1,0
-	Stop,Object_Buddy1,0
-	SetGroup,Object_Buddy2,0
-	Stop,Object_Buddy2,0
-	SetGroup,Object_Buddy3,0
-	Stop,Object_Buddy3,0
-	SetGroup,Object_Buddy4,0
-	Stop,Object_Buddy4,0
-	SetGroup,Object_Buddy5,0
-	Stop,Object_Buddy5,0
-	SetGroup,Object_Buddy6,0
-	Stop,Object_Buddy6,0
-	BeaconOff,Object_CurrentPowerSource
-LOC_179:
-	HasPilot,Object_Observer1
-	IfEQ,1,LOC_179
-	GetTeam,Object_Observer1
-	IfEQ,5,LOC_179
-	HasPilot,Object_Observer2
-	IfEQ,1,LOC_179
-	GetTeam,Object_Observer2
-	IfEQ,5,LOC_179
-	SetStep,_Routine1,LOC_72
+[routine,_Routine3,1,true]
+	OnNewObject,100,_Routine3,Object_NewObjectCheck
+LOC_229:
+	RunSpeed,_Routine3,0,true
+	IsODF,Object_NewObjectCheck,"ispilo"
+	IfEQ,0,LOC_229
+	IsPlayer,Object_NewObjectCheck
+	IfEQ,1,LOC_229
+	RunSpeed,_Routine3,1,true
+	Wait,2
+	GoToo,Object_NewObjectCheck,Object_DropShip,1
+	CamObject,Object_DropShip,Position1,Object_NewObjectCheck,18
+	Wait,2
+	Remove,Object_NewObjectCheck
 	RunSpeed,_Routine1,1,true,true
-	RunSpeed,_Routine5,8,true
-	RunSpeed,_Routine7,3,true
-	RunSpeed,_Routine6,1,true
-	RunSpeed,_Routine9,1,true
-	Wait,7
-	Audio,"edf01_05.wav"
-	Wait,14
-	Audio,"edf01_05A.wav"
-	Createp,Object_SurvivorDropoff,"ibnav",1,"SafeNav"
-	SetName,Object_SurvivorDropoff,"Survivor Dropoff"
-	BeaconOn,Object_SurvivorDropoff
-	Createp,Object_TmpForChecks,"ibnav",1,"SurvivorNav1"
-	SetName,Object_TmpForChecks,"Survivors"
-	BeaconOn,Object_TmpForChecks
-	Createp,Object_TmpForChecks,"ibnav",1,"SurvivorNav2"
-	SetName,Object_TmpForChecks,"Survivors"
-	BeaconOn,Object_TmpForChecks
-	Createp,Object_TmpForChecks,"evscout",5,"Enemy2"
-	Createp,Object_TmpForChecks,"evscout",5,"Enemy3"
-	Wait,140
-LOC_209:
-	GetPlayer,Object_Player
-	DistObject,Object_DropShip,Object_Player
-	IfLT,200,LOC_209
-	Createp,Object_TmpForChecks,">evturr",5,"TurretSpawn"
-	GoTo,Object_TmpForChecks,"Turret1",1
-	Createp,Object_TmpForChecks,">evturr",5,"TurretSpawn"
-	GoTo,Object_TmpForChecks,"Turret2",1
-	Createp,Object_TmpForChecks,">evturr",5,"TurretSpawn"
-	GoTo,Object_TmpForChecks,"Turret3",1
-	Stop,Object_FriendTurret3,0
-	Stop,Object_FriendTurret2,0
-	Createp,Object_TmpForChecks,">ivserv",1,"Buddy4"
-	SetGroup,Object_TmpForChecks,2
-	Createp,Object_TmpForChecks,">ivserv",1,"Buddy5"
-	SetGroup,Object_TmpForChecks,3
-	Createp,Object_TmpForChecks,">ivserv",1,"Buddy6"
-	SetGroup,Object_TmpForChecks,4
-	Audio,"edf01_05B.wav"
+LOC_241:
+	RunSpeed,_Routine3,0,true
+	IsODF,Object_NewObjectCheck,"evtank"
+	IfEQ,1,LOC_246
+	IsODF,Object_NewObjectCheck,"evscout"
+	IfEQ,0,LOC_241
+LOC_246:
+	GetTeam,Object_NewObjectCheck
+	IfNE,5,LOC_241
+	Add,Variable11,1,Variable11
+	IfGT,24,LOC_251
+	JumpTo,LOC_241
+LOC_251:
+	Add,Variable_SurvivorNumber5,0
+	IfLT,1,LOC_241
+	Clear
+	Display,_Text8,red
+	Audio,"edf01_08.wav"
+	Wait,5
+	Audio,"edf01_10.wav"
+	Fail,12,"edf01L3.txt"
 
-//--------------------------------------------------------------------[routine,_Routine3,1,true]	OnNewObject,100,_Routine3,Object_NewObjectCheckLOC_229:	RunSpeed,_Routine3,0,true	IsODF,Object_NewObjectCheck,"ispilo"	IfEQ,0,LOC_229	IsPlayer,Object_NewObjectCheck	IfEQ,1,LOC_229	RunSpeed,_Routine3,1,true	Wait,2	GoToo,Object_NewObjectCheck,Object_DropShip,1	CamObject,Object_DropShip,Position1,Object_NewObjectCheck,18	Wait,2	Remove,Object_NewObjectCheck	RunSpeed,_Routine1,1,true,trueLOC_241:	RunSpeed,_Routine3,0,true	IsODF,Object_NewObjectCheck,"evtank"	IfEQ,1,LOC_246	IsODF,Object_NewObjectCheck,"evscout"	IfEQ,0,LOC_241LOC_246:	GetTeam,Object_NewObjectCheck	IfNE,5,LOC_241	Add,Variable11,1,Variable11	IfGT,24,LOC_251	JumpTo,LOC_241LOC_251:	Add,Variable_SurvivorNumber5,0	IfLT,1,LOC_241	Clear	Display,_Text8,red	Audio,"edf01_08.wav"	Wait,5	Audio,"edf01_10.wav"	Fail,12,"edf01L3.txt"
 //--------------------------------------------------------------------
 [routine,_Routine4,1,true]
 	OnDelObject,100,_Routine4,Object_RemoveObjectCheck
@@ -704,7 +803,50 @@ LOC_335:
 	Audio,"edf01_07.wav"
 	Fail,15,"edf01L2.txt"
 
-//--------------------------------------------------------------------[routine,_Routine6,0,true]LOC_340:	GetByIndex,Object_SurvivorForDropoffCheck,Object_SurvivorArray,Variable_SurvivorNumber2	IsODF,Object_SurvivorForDropoffCheck,">ivtank_e01"	IfEQ,0,LOC_361	DistPath,Object_SurvivorForDropoffCheck,"SafeNav"	IfGT,85,LOC_361	SetByIndex,Object_SurvivorArray,Variable_SurvivorNumber2,Object_DropShip	Add,Variable10,1,Variable10	Replace,Object_SurvivorForDropoffCheck,">ivtank",1	SetGroup,Object_SurvivorForDropoffCheck,0	Add,Variable_SurvivorSafeCount,1,Variable_SurvivorSafeCount	SetName,Object_SurvivorDropoff,"Survivor Dropoff: %i safe",Variable_SurvivorSafeCount	IfEQ,9,LOC_365	IfEQ,10,LOC_372	IfEQ,3,LOC_355	IfNE,7,LOC_361LOC_355:	Createp,Object_TempForAttackers,"evtank",5,"AttackerSpawn2"	GoTo,Object_TempForAttackers,"SafeNav",0	Createp,Object_TempForAttackers,"evmisl",5,"AttackerSpawn2"	GoTo,Object_TempForAttackers,"SafeNav",0	Createp,Object_TempForAttackers,"evmisl",5,"AttackerSpawn2"	GoTo,Object_TempForAttackers,"SafeNav",0LOC_361:	Add,Variable_SurvivorNumber2,1,Variable_SurvivorNumber2	IfLT,10,LOC_340	Set,Variable_SurvivorNumber2,0	JumpTo,LOC_340LOC_365:	Add,Variable12,0	IfEQ,0,LOC_355	Clear	Display,_Text11,green	Audio,"edf01_06.wav"	Succeed,15,"edf01W2.txt"	RunSpeed,_Routine6,0,trueLOC_372:	Audio,"edf01_06.wav"	Clear	Display,_Text9,green	Succeed,15,"edf01W1.txt"
+//--------------------------------------------------------------------
+[routine,_Routine6,0,true]
+LOC_340:
+	GetByIndex,Object_SurvivorForDropoffCheck,Object_SurvivorArray,Variable_SurvivorNumber2
+	IsODF,Object_SurvivorForDropoffCheck,">ivtank_e01"
+	IfEQ,0,LOC_361
+	DistPath,Object_SurvivorForDropoffCheck,"SafeNav"
+	IfGT,85,LOC_361
+	SetByIndex,Object_SurvivorArray,Variable_SurvivorNumber2,Object_DropShip
+	Add,Variable10,1,Variable10
+	Replace,Object_SurvivorForDropoffCheck,">ivtank",1
+	SetGroup,Object_SurvivorForDropoffCheck,0
+	Add,Variable_SurvivorSafeCount,1,Variable_SurvivorSafeCount
+	SetName,Object_SurvivorDropoff,"Survivor Dropoff: %i safe",Variable_SurvivorSafeCount
+	IfEQ,9,LOC_365
+	IfEQ,10,LOC_372
+	IfEQ,3,LOC_355
+	IfNE,7,LOC_361
+LOC_355:
+	Createp,Object_TempForAttackers,"evtank",5,"AttackerSpawn2"
+	GoTo,Object_TempForAttackers,"SafeNav",0
+	Createp,Object_TempForAttackers,"evmisl",5,"AttackerSpawn2"
+	GoTo,Object_TempForAttackers,"SafeNav",0
+	Createp,Object_TempForAttackers,"evmisl",5,"AttackerSpawn2"
+	GoTo,Object_TempForAttackers,"SafeNav",0
+LOC_361:
+	Add,Variable_SurvivorNumber2,1,Variable_SurvivorNumber2
+	IfLT,10,LOC_340
+	Set,Variable_SurvivorNumber2,0
+	JumpTo,LOC_340
+LOC_365:
+	Add,Variable12,0
+	IfEQ,0,LOC_355
+	Clear
+	Display,_Text11,green
+	Audio,"edf01_06.wav"
+	Succeed,15,"edf01W2.txt"
+	RunSpeed,_Routine6,0,true
+LOC_372:
+	Audio,"edf01_06.wav"
+	Clear
+	Display,_Text9,green
+	Succeed,15,"edf01W1.txt"
+
 //--------------------------------------------------------------------
 [routine,_Routine7,0,true]
 LOC_377:
@@ -729,8 +871,24 @@ LOC_390:
 	Set,Variable_SurvivorNumber3,0
 	Set,Variable_SurvivorNumber5,0
 	JumpTo,LOC_377
-LOC_395:
-//--------------------------------------------------------------------[routine,_Routine8,1,true]LOC_396:	RunSpeed,_Routine8,0,true	IsAround,Object31	IfEQ,1,LOC_396	Add,Variable10,-1,Variable10	IfGT,1,LOC_396	RunSpeed,_Routine8,1,true	Clear	Display,_Text6,red	Audio,"edf01_09.wav"	Wait,9	Audio,"edf01_10.wav"	Fail,14,"edf01L1.txt"
+LOC_395:
+
+//--------------------------------------------------------------------
+[routine,_Routine8,1,true]
+LOC_396:
+	RunSpeed,_Routine8,0,true
+	IsAround,Object31
+	IfEQ,1,LOC_396
+	Add,Variable10,-1,Variable10
+	IfGT,1,LOC_396
+	RunSpeed,_Routine8,1,true
+	Clear
+	Display,_Text6,red
+	Audio,"edf01_09.wav"
+	Wait,9
+	Audio,"edf01_10.wav"
+	Fail,14,"edf01L1.txt"
+
 //--------------------------------------------------------------------
 [routine,_Routine9,1,true]
 LOC_409:
@@ -746,16 +904,19 @@ LOC_409:
 
 	if((m_mainStateMachineLast != m_mainStateMachine)
 		|| (m_SpawnAttackerLoopStateMachineLast != m_SpawnAttackerLoopStateMachine)
-		|| (m_SpawnAttackerLoopStateMachine2Last != m_SpawnAttackerLoopStateMachine2))
+		|| (m_SpawnAttackerLoopStateMachine2Last != m_SpawnAttackerLoopStateMachine2)
+		|| (m_Routine2StateMachineLast != m_Routine2StateMachine))
 	{
-		sprintf_s(TempMsgString, "Main: %d, Attack1: %d, Attack2: %d"
+		sprintf_s(TempMsgString, "Main: %d, Attack1: %d, Attack2: %d, Routine2: %d"
 			, m_mainStateMachine
 			, m_SpawnAttackerLoopStateMachine
-			, m_SpawnAttackerLoopStateMachine2);
+			, m_SpawnAttackerLoopStateMachine2
+			, m_Routine2StateMachine);
 		PrintConsoleMessage(TempMsgString);
 		m_mainStateMachineLast = m_mainStateMachine;
 		m_SpawnAttackerLoopStateMachineLast = m_SpawnAttackerLoopStateMachine;
 		m_SpawnAttackerLoopStateMachine2Last = m_SpawnAttackerLoopStateMachine2;
+		m_Routine2StateMachineLast = m_Routine2StateMachine;
 	}
 
 	m_ElapsedGameTime++;

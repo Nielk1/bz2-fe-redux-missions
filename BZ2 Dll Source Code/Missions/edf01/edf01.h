@@ -111,6 +111,8 @@ public:
 		m_SpawnAttackerLoopWaitTillTime,
 		m_SpawnAttackerLoopStateMachine2,
 		m_SpawnAttackerLoopWaitTillTime2,
+		m_Routine2StateMachine,
+		m_Routine2WaitTillTime,
 		i_last;
 
 	Vector
@@ -144,7 +146,7 @@ private:
 	int m_mainStateMachineLast;
 	int m_SpawnAttackerLoopStateMachineLast;
 	int m_SpawnAttackerLoopStateMachine2Last;
-
+	int m_Routine2StateMachineLast;
 };
 
 #endif // edf01_H__
