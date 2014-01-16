@@ -2,6 +2,7 @@
 #define edf01_H__
 
 #include "..\Shared\DLLBase.h"
+#include <cstring>
 
 class EDF01Mission : public DLLBase//public SPMission 
 {
@@ -29,6 +30,7 @@ public:
 
 	void Init(void);
 	void AddObject(Handle h);
+	void DeleteObject(Handle h);
 	bool Load(bool missionSave);
 	bool PostLoad(bool missionSave);
 	bool Save(bool missionSave);
@@ -37,18 +39,23 @@ public:
 	// bools
 	bool
 		b_first,
+
 		m_DidOneTimeInit,
-		//m_ConvoyContinueToBase,
-		//m_EnableFailCheck,
-		//m_runPowerAIStateMachine,
-		//m_runPowerPlayerStateMachine,
-		//m_Routine4Enable,
-		//m_CerbRoutine,
-		//m_PreventPowerDamage,
-		//m_SetGun10Heath,
-		//m_PlayerCanMove,
-		m_SpawnAttackerLoop1,
-		m_SpawnAttackerLoop2,
+
+		m_ShutlzGoingToDropship,
+		m_ShutlzCamActive,
+
+		m_SpawnAttackerLoop,
+		m_FirstResponsiveAttackWave,
+
+		m_SurvivorChecksActive,
+		m_NotedLostSurvivor,
+		m_SurvivorNav1ShowCount,
+		m_SurvivorNav2ShowCount,
+
+		m_StepOneOfTankCountFailDone,
+		m_StepOneOfEnemySpawnCountFailDone,
+
 		b_last;
 
 	// floats
@@ -59,65 +66,64 @@ public:
 	// handles
 	Handle
 		h_first,
-		Object_Player,
-		Object_Observer1,
-		Object_Observer2,
-		Object_CurrentPowerSource,
-		Object_Buddy1,
-		Object_Buddy2,
-		Object_Buddy3,
-		Object_Buddy4,
-		Object_Buddy5,
-		Object_Buddy6,
-		Object_TempCreation,
-		Object_TmpForChecks,
-		Object_NewObjectCheck,
-		Object_RemoveObjectCheck,
-		Object_DropShip,
-		Object_TempSurvivor,
-		Object_SurvivorForDropoffCheck,
-		Object_SurvivorForPilotCheck,
-		Object_WaitingSurvivor,
-		Object_SurvivorArray[10],
-		Object_NearSurvivor,
-		Object31,
-		Object_SurvivorDropoff,
-		Object_FriendTurret3,
-		Object_FriendTurret2,
-		Object_APC1,
-		Object_APC2,
-		Object_TempForAttackers,
+
+		m_BuddyTanks[6],
+		m_FriendTurret3,
+		m_FriendTurret2,
+		m_APC1,
+		m_APC2,
+
+		m_ShultzTank,
+		m_ShultzPilot,
+
+		m_HadeanObserver1,
+		m_HadeanObserver2,
+
+		m_TargetPowerSourceForScanning,
+
+		m_Survivors[10],
+		m_SurvivorDropoffDropship,
+
+		m_SurvivorDropoffNav,
+		m_SurvivorNav1,
+		m_SurvivorNav2,
+
 		h_last;
 
 	// integers
 	int
 		i_first,
+
 		m_ElapsedGameTime,
-		m_mainStateMachine,
-		m_mainWaitTillTime,
-		Variable_ScannedPercent,
-		Variable_PowerSourceNumber,
-		Variable_SurvivorNumber,
-		Variable_SurvivorNumber2,
-		Variable_SurvivorNumber3,
-		Variable_SurvivorNumber4,
-		Variable_SurvivorNumber5,
-		Variable_SurvivorNumber6,
-		Variable_SurvivorSafeCount,
-		Variable10,
-		Variable11,
-		Variable12,
+
+		m_ShutlzPilotActionWaitTillTime,
+
+		m_ScanningMissionPhase,
+		m_ScanningMissionPhaseWaitTillTime,
+		m_ScannedPercent,
+		m_PowerSourceNumber,
+
+		m_SurvivorMissionPhase,
+		m_SurvivorMissionPhaseWaitTillTime,
+		m_SurvivorChecksWaitTillTime,
+		m_SurvivorSafeCount,
+		m_SurvivorNumberForBuddyLabeling,
+
 		m_SpawnAttackerLoopStateMachine,
 		m_SpawnAttackerLoopWaitTillTime,
 		m_SpawnAttackerLoopStateMachine2,
 		m_SpawnAttackerLoopWaitTillTime2,
-		m_Routine2StateMachine,
-		m_Routine2WaitTillTime,
+		
+		m_AttackCountFailCheckWaitTillTime,
+		m_AttackerCountForFailCheck,
+
 		i_last;
 
 	Vector
 		v_first,
-		Position1,
+
+		m_ShultzEjectCameraBase,
+
 		v_last;
 
 protected:
@@ -140,13 +146,13 @@ private:
 	int m_GameTPS;
 	char TempMsgString[1024];
 
+	void PreloadOdfs();
+
 	Vector GetVectorFromPath(Name path, int point = 0);
 	int UnsignedToSigned(unsigned int x);
+	Handle ReplaceObject(Handle h, char* odf, bool keepHealth = false);
 
-	int m_mainStateMachineLast;
-	int m_SpawnAttackerLoopStateMachineLast;
-	int m_SpawnAttackerLoopStateMachine2Last;
-	int m_Routine2StateMachineLast;
+	//char m_StringWorkBuffer[200];
 };
 
 #endif // edf01_H__
