@@ -42,6 +42,8 @@ public:
 
 		m_DidOneTimeInit,
 
+		m_ForceNavsToStay,
+
 		m_ShutlzGoingToDropship,
 		m_ShutlzCamActive,
 
@@ -146,7 +148,8 @@ private:
 	int m_GameTPS;
 	char TempMsgString[1024];
 
-	void PreloadOdfs();
+	void Preload();
+	void MakeNavs();
 
 	Vector GetVectorFromPath(Name path, int point = 0);
 	int UnsignedToSigned(unsigned int x);

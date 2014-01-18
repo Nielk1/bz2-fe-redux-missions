@@ -5,21 +5,21 @@
 #define BLUE RGB(0,0,255)
 #define VIOLET RGB(255,0,255)
 
-char* _Text1 = "Your vehicle is equipped with\na special scanning device.\nScan the power source by\ngetting near it.";
-char* _Text2 = "Hostiles are moving to attack!!\nTake action!";
-char* _Text3 = "Have your subordinate tanks pick\nup the survivors, and bring them\nback to the dropships.  Only the\nsubordinate Sabres can get them.";
-char* _Text4 = "Tanks carrying survivors will be\nplaced in Group 10 automatically.\nThey can't pick you up while\ncarrying a survivor.  Don't lose\nany survivors!";
-char* _Text5 = "Scan the next highlighted\npower source.";
-char* _Text6 = "You've lost too many tanks\nto complete this mission.";
-char* _Text7 = "That's two survivors dead.  That\nlast one was no ordinary survivor,\nbut General Hardin himself!";
-char* _Text8 = "The Hadeans have overrun the\narea.  There's no hope now.";
-char* _Text9 = "Congratulations.  All the\nsurvivors are safe.  General\nHardin was among them, and\nwould like to thank you.";
-char* _Text10 = "A survivor was KILLED.  We\nCANNOT afford to lose another!!!";
-char* _Text11 = "All the remaining survivors are\nsafe.  We lost one, regretably.";
+char* OBJECTIVE_TEXT_1 = "Your vehicle is equipped with\na special scanning device.\nScan the power source by\ngetting near it.";
+char* OBJECTIVE_TEXT_2 = "Hostiles are moving to attack!!\nTake action!";
+char* OBJECTIVE_TEXT_3 = "Have your subordinate tanks pick\nup the survivors, and bring them\nback to the dropships.  Only the\nsubordinate Sabres can get them.";
+char* OBJECTIVE_TEXT_4 = "Tanks carrying survivors will be\nplaced in Group 10 automatically.\nThey can't pick you up while\ncarrying a survivor.  Don't lose\nany survivors!";
+char* OBJECTIVE_TEXT_5 = "Scan the next highlighted\npower source.";
+char* OBJECTIVE_TEXT_6 = "You've lost too many tanks\nto complete this mission.";
+char* OBJECTIVE_TEXT_7 = "That's two survivors dead.  That\nlast one was no ordinary survivor,\nbut General Hardin himself!";
+char* OBJECTIVE_TEXT_8 = "The Hadeans have overrun the\narea.  There's no hope now.";
+char* OBJECTIVE_TEXT_9 = "Congratulations.  All the\nsurvivors are safe.  General\nHardin was among them, and\nwould like to thank you.";
+char* OBJECTIVE_TEXT_10 = "A survivor was KILLED.  We\nCANNOT afford to lose another!!!";
+char* OBJECTIVE_TEXT_11 = "All the remaining survivors are\nsafe.  We lost one, regretably.";
 
-#define ODF_TANK_FRIEND "ivtank"
-#define ODF_TANK_FRIEND_SURVIVOR "ivtank_e01"
-#define ODF_TURRET_FRIEND "ivturr"
+#define ODF_FRIEND_TANK "ivtank"
+#define ODF_FRIEND_TANK_SURVIVOR "ivtank_e01"
+#define ODF_FRIEND_TURRET "ivturr"
 #define ODF_FRIEND_APC "ivapc"
 #define ODF_ENEMY_TANK "evtank"
 #define ODF_ENEMY_SCOUT "evscout"
@@ -27,8 +27,33 @@ char* _Text11 = "All the remaining survivors are\nsafe.  We lost one, regretably
 #define ODF_SHULTZ_PILOT "ispilo"
 #define ODF_SURVIVOR_PILOT "ispilo"
 
-#define INT_SCAN_DISTANCE 190
-#define INT_SCAN_PER_SEC 40
+#define AUDIO_01 "edf01_01.wav"
+#define AUDIO_02 "edf01_02.wav"
+#define AUDIO_03 "edf01_03.wav"
+#define AUDIO_04 "edf01_04.wav"
+#define AUDIO_05 "edf01_05.wav"
+#define AUDIO_05A "edf01_05A.wav"
+#define AUDIO_05B "edf01_05B.wav"
+#define AUDIO_06 "edf01_06.wav"
+#define AUDIO_06A "edf01_06A.wav"
+#define AUDIO_07 "edf01_07.wav"
+#define AUDIO_08 "edf01_08.wav"
+#define AUDIO_09 "edf01_09.wav"
+#define AUDIO_10 "edf01_10.wav"
+#define AUDIO_TANK_PICKUP "ivtank03.wav" // "I've got em"
+
+#define TEXT_WIN1 "edf01W1.txt"
+#define TEXT_WIN2 "edf01W2.txt"
+#define TEXT_LOSS1 "edf01L1.txt"
+#define TEXT_LOSS2 "edf01L2.txt"
+#define TEXT_LOSS3 "edf01L3.txt"
+
+#define INT_SCAN_DISTANCE 190 // Minimum distance for scanning
+#define INT_SCAN_PER_SEC 40 // Percent per second * 10
+#define INT_ENEMY_SATURATION_SLOWDOWN_COUNT 15 // At this number, enemy spawns slow down
+#define INT_ENEMY_SATURATION_MAX_COUNT 24 // Loss if more than this many units spawned
+#define INT_SURVIVOR_PICKUP_DISTANCE 24 // Minimum distance for picking up survivors
+#define INT_SURVIVOR_DROPOFF_DISTANCE 85 // Minimum distance for dropping off survivors
 
 void EDF01Mission::Init(void)
 {
@@ -49,7 +74,7 @@ void EDF01Mission::Init(void)
 
 	m_DidOneTimeInit = true;
 
-	PreloadOdfs();
+	Preload();
 
 	// TODO: revisit the camera code, get rid of these hard coded vectors
 	m_ShultzEjectCameraBase = Vector(-10.0f,50.0f,-10.0f);
@@ -127,17 +152,54 @@ void EDF01Mission::DeleteObject(Handle h)
 	}
 }
 
-void EDF01Mission::PreloadOdfs()
+void EDF01Mission::Preload()
 {
-	PreloadODF(ODF_TANK_FRIEND);
-	PreloadODF(ODF_TANK_FRIEND_SURVIVOR);
-	PreloadODF(ODF_TURRET_FRIEND);
+	PreloadODF(ODF_FRIEND_TANK);
+	PreloadODF(ODF_FRIEND_TANK_SURVIVOR);
+	PreloadODF(ODF_FRIEND_TURRET);
 	PreloadODF(ODF_FRIEND_APC);
 	PreloadODF(ODF_ENEMY_TANK);
 	PreloadODF(ODF_ENEMY_SCOUT);
 	PreloadODF(ODF_ENEMY_MISL);
 	PreloadODF(ODF_SHULTZ_PILOT);
 	PreloadODF(ODF_SURVIVOR_PILOT);
+
+	PreloadAudioMessage(AUDIO_01);
+	PreloadAudioMessage(AUDIO_02);
+	PreloadAudioMessage(AUDIO_03);
+	PreloadAudioMessage(AUDIO_04);
+	PreloadAudioMessage(AUDIO_05);
+	PreloadAudioMessage(AUDIO_05A);
+	PreloadAudioMessage(AUDIO_05B);
+	PreloadAudioMessage(AUDIO_06);
+	PreloadAudioMessage(AUDIO_06A);
+	PreloadAudioMessage(AUDIO_07);
+	PreloadAudioMessage(AUDIO_08);
+	PreloadAudioMessage(AUDIO_09);
+	PreloadAudioMessage(AUDIO_10);
+	PreloadAudioMessage(AUDIO_TANK_PICKUP);
+}
+
+void EDF01Mission::MakeNavs()
+{
+	if(!IsAround(m_SurvivorDropoffNav) || !m_SurvivorDropoffNav)
+	{
+		m_SurvivorDropoffNav = BuildObject("ibnav",1,"SafeNav");
+		SetObjectiveName(m_SurvivorDropoffNav,"Survivor Dropoff");
+		SetObjectiveOn(m_SurvivorDropoffNav);
+	}
+	if(!IsAround(m_SurvivorNav1) || !m_SurvivorNav1)
+	{
+		m_SurvivorNav1 = BuildObject("ibnav",1,"SurvivorNav1");
+		SetObjectiveName(m_SurvivorNav1,"Survivors");
+		SetObjectiveOn(m_SurvivorNav1);
+	}
+	if(!IsAround(m_SurvivorNav2) || !m_SurvivorNav2)
+	{
+		m_SurvivorNav2 = BuildObject("ibnav",1,"SurvivorNav2");
+		SetObjectiveName(m_SurvivorNav2,"Survivors");
+		SetObjectiveOn(m_SurvivorNav2);
+	}
 }
 
 bool EDF01Mission::Load(bool missionSave)
@@ -215,7 +277,7 @@ bool EDF01Mission::Load(bool missionSave)
 
 	//PUPMgr::Load(missionSave);
 
-	PreloadOdfs();
+	Preload();
 	return ret;
 }
 
@@ -295,6 +357,11 @@ void EDF01Mission::Execute(void)
 	Handle localPlayer = GetPlayerHandle();
 	Handle tmpHandle = 0;
 
+	if(m_ForceNavsToStay)
+	{
+		MakeNavs();
+	}
+
 	if(m_ShultzPilot) // we are tracking his pilot, he ejected
 	{
 		if(m_ShutlzCamActive)
@@ -334,9 +401,9 @@ void EDF01Mission::Execute(void)
 		case 1:
 			SetPerceivedTeam(localPlayer,5);
 
-			m_FriendTurret3 = BuildObject(ODF_TURRET_FRIEND,1,"FriendTurret3");
-			m_FriendTurret2 = BuildObject(ODF_TURRET_FRIEND,1,"FriendTurret2");
-			tmpHandle = BuildObject(ODF_TURRET_FRIEND,1,"FriendTurret1");
+			m_FriendTurret3 = BuildObject(ODF_FRIEND_TURRET,1,"FriendTurret3");
+			m_FriendTurret2 = BuildObject(ODF_FRIEND_TURRET,1,"FriendTurret2");
+			tmpHandle = BuildObject(ODF_FRIEND_TURRET,1,"FriendTurret1");
 
 			SetGroup(m_FriendTurret3,1);
 			SetGroup(m_FriendTurret2,1);
@@ -350,12 +417,12 @@ void EDF01Mission::Execute(void)
 			Stop(m_APC1,1);
 			Stop(m_APC2,1);
 
-			m_BuddyTanks[0] = BuildObject(ODF_TANK_FRIEND,1,"Buddy1");
-			m_BuddyTanks[1] = BuildObject(ODF_TANK_FRIEND,1,"Buddy2");
-			m_BuddyTanks[2] = BuildObject(ODF_TANK_FRIEND,1,"Buddy3");
-			m_BuddyTanks[3] = BuildObject(ODF_TANK_FRIEND,1,"Buddy4");
-			m_BuddyTanks[4] = BuildObject(ODF_TANK_FRIEND,1,"Buddy5");
-			m_BuddyTanks[5] = BuildObject(ODF_TANK_FRIEND,1,"Buddy6");
+			m_BuddyTanks[0] = BuildObject(ODF_FRIEND_TANK,1,"Buddy1");
+			m_BuddyTanks[1] = BuildObject(ODF_FRIEND_TANK,1,"Buddy2");
+			m_BuddyTanks[2] = BuildObject(ODF_FRIEND_TANK,1,"Buddy3");
+			m_BuddyTanks[3] = BuildObject(ODF_FRIEND_TANK,1,"Buddy4");
+			m_BuddyTanks[4] = BuildObject(ODF_FRIEND_TANK,1,"Buddy5");
+			m_BuddyTanks[5] = BuildObject(ODF_FRIEND_TANK,1,"Buddy6");
 
 			Stop(m_BuddyTanks[0],1);
 			Stop(m_BuddyTanks[1],1);
@@ -371,7 +438,7 @@ void EDF01Mission::Execute(void)
 			SetPerceivedTeam(m_BuddyTanks[4],5);
 			SetPerceivedTeam(m_BuddyTanks[5],5);
 
-			m_ShultzTank = BuildObject(ODF_TANK_FRIEND,1,"Dummy");
+			m_ShultzTank = BuildObject(ODF_FRIEND_TANK,1,"Dummy");
 			Stop(m_ShultzTank,1);
 			SetObjectiveName(m_ShultzTank,"Schulz");
 			SetObjectiveOn(m_ShultzTank);
@@ -380,7 +447,7 @@ void EDF01Mission::Execute(void)
 			m_ScanningMissionPhase++;
 			break;
 		case 2:
-			AudioMessage("edf01_01.wav");
+			AudioMessage(AUDIO_01);
 			Goto(m_APC1,"APCDest",1);
 			Goto(m_APC2,"APCDest",1);
 			m_ScanningMissionPhaseWaitTillTime = m_ElapsedGameTime + (17 * m_GameTPS);
@@ -392,9 +459,9 @@ void EDF01Mission::Execute(void)
 			m_ScanningMissionPhase++;
 			break;
 		case 4:
-			AudioMessage("edf01_02.wav");
-			AddObjective(_Text1,WHITE);
-			AudioMessage("edf01_03.wav");
+			AudioMessage(AUDIO_02);
+			AddObjective(OBJECTIVE_TEXT_1,WHITE);
+			AudioMessage(AUDIO_03);
 			m_ScanningMissionPhase++;
 			break;
 		case 5: // move to target for scanning
@@ -437,7 +504,7 @@ void EDF01Mission::Execute(void)
 						if(m_PowerSourceNumber <= 1)
 						{
 							ClearObjectives();
-							AddObjective(_Text5,WHITE);
+							AddObjective(OBJECTIVE_TEXT_5,WHITE);
 							m_ScanningMissionPhase = 5;
 						}else{
 							m_ScanningMissionPhaseWaitTillTime = m_ElapsedGameTime + (61 * m_GameTPS);
@@ -552,7 +619,7 @@ void EDF01Mission::Execute(void)
 				case 6:
 					tmpHandle = BuildObject(ODF_ENEMY_TANK,5,"TurretSpawn");
 					Patrol(tmpHandle,"EnemyPatrol1",0);
-					if(m_AttackerCountForFailCheck < 15)
+					if(m_AttackerCountForFailCheck < INT_ENEMY_SATURATION_SLOWDOWN_COUNT)
 					{
 						m_SpawnAttackerLoopStateMachine2 = 0;
 					}else{
@@ -616,7 +683,7 @@ void EDF01Mission::Execute(void)
 				m_SurvivorMissionPhase++;
 			break;
 		case 6:
-			AudioMessage("edf01_04.wav");
+			AudioMessage(AUDIO_04);
 			SetPerceivedTeam(localPlayer,1);
 			SetPerceivedTeam(m_BuddyTanks[0],1);
 			SetPerceivedTeam(m_BuddyTanks[1],1);
@@ -629,7 +696,7 @@ void EDF01Mission::Execute(void)
 			SetPerceivedTeam(m_BuddyTanks[4],1);
 			SetPerceivedTeam(m_BuddyTanks[5],1);
 			ClearObjectives();
-			AddObjective(_Text2,WHITE);
+			AddObjective(OBJECTIVE_TEXT_2,WHITE);
 			m_SurvivorMissionPhaseWaitTillTime = m_ElapsedGameTime + (4 * m_GameTPS);
 			m_SurvivorMissionPhase++;
 			break;
@@ -668,26 +735,19 @@ void EDF01Mission::Execute(void)
 				m_SurvivorMissionPhase++;
 			break;
 		case 11:
-			AudioMessage("edf01_05.wav");
+			AudioMessage(AUDIO_05);
 			m_SurvivorMissionPhaseWaitTillTime = m_ElapsedGameTime + (14 * m_GameTPS);
 			m_SurvivorMissionPhase++;
 			break;
 		case 12:
-			AudioMessage("edf01_05A.wav");
-			m_SurvivorDropoffNav = BuildObject("ibnav",1,"SafeNav");
-			SetObjectiveName(m_SurvivorDropoffNav,"Survivor Dropoff");
-			SetObjectiveOn(m_SurvivorDropoffNav);
-			m_SurvivorNav1 = BuildObject("ibnav",1,"SurvivorNav1");
-			SetObjectiveName(m_SurvivorNav1,"Survivors");
-			SetObjectiveOn(m_SurvivorNav1);
-			m_SurvivorNav2 = BuildObject("ibnav",1,"SurvivorNav2");
-			SetObjectiveName(m_SurvivorNav2,"Survivors");
-			SetObjectiveOn(m_SurvivorNav2);
+			AudioMessage(AUDIO_05A);
+			m_ForceNavsToStay = true;
+			MakeNavs();
 			BuildObject(ODF_ENEMY_SCOUT,5,"Enemy2");
 			BuildObject(ODF_ENEMY_SCOUT,5,"Enemy3");
 
 			//////// Was part of a mysterious repeating routine in the BZS ////////
-			ClearObjectives();			AddObjective(_Text3,WHITE);			AddObjective(_Text4,WHITE);
+			ClearObjectives();			AddObjective(OBJECTIVE_TEXT_3,WHITE);			AddObjective(OBJECTIVE_TEXT_4,WHITE);
 			///////////////////////////////////////////////////////////////////////
 
 			m_SurvivorMissionPhaseWaitTillTime = m_ElapsedGameTime + (140 * m_GameTPS);
@@ -715,7 +775,7 @@ void EDF01Mission::Execute(void)
 			SetGroup(tmpHandle,3);
 			tmpHandle = BuildObject("ivserv",1,"Buddy6");
 			SetGroup(tmpHandle,4);
-			AudioMessage("edf01_05B.wav");
+			AudioMessage(AUDIO_05B);
 			m_SurvivorMissionPhase++;
 			break;
 		}
@@ -741,24 +801,25 @@ void EDF01Mission::Execute(void)
 					SurvivorsLost++;
 				}else if(IsOdf(survivor, ODF_SURVIVOR_PILOT))
 				{
-					Handle NearSurvivor = GetNearestVehicle(survivor);
-					Dist dist = GetDistance(NearSurvivor,survivor);
+					Dist dist = INT_SURVIVOR_PICKUP_DISTANCE + 1;
 					
 					int BuddyIndex = -1;
 					for(int y=0;y<6;y++)
 					{
-						if(m_BuddyTanks[y] == NearSurvivor)
+						Dist findingNearest = GetDistance(m_BuddyTanks[y],survivor);
+						if(findingNearest < dist)
 						{
+							dist = findingNearest;
 							BuddyIndex = y;
-							break;
 						}
 					}
-					if(!IsPlayer(NearSurvivor) && dist <= 24 && IsOdf(NearSurvivor, ODF_TANK_FRIEND) && BuddyIndex >= 0)
+
+					if(m_BuddyTanks[BuddyIndex] && !IsPlayer(m_BuddyTanks[BuddyIndex]) && dist <= INT_SURVIVOR_PICKUP_DISTANCE && IsOdf(m_BuddyTanks[BuddyIndex], ODF_FRIEND_TANK) && BuddyIndex >= 0)
 					{
 						RemoveObject(m_Survivors[x]);
-						m_Survivors[x] = ReplaceObject(NearSurvivor, ODF_TANK_FRIEND_SURVIVOR, true);
+						m_Survivors[x] = ReplaceObject(m_BuddyTanks[BuddyIndex], ODF_FRIEND_TANK_SURVIVOR, true);
 						m_BuddyTanks[BuddyIndex] = m_Survivors[x];
-						AudioMessage("ivtank03.wav");
+						AudioMessage(AUDIO_TANK_PICKUP);
 						sprintf(TempMsgString,"Has survivor %i",++m_SurvivorNumberForBuddyLabeling); // prefixed addition so it occurs before the var is used in function
 						SetObjectiveName(m_Survivors[x],TempMsgString);
 						SetObjectiveOn(m_Survivors[x]);
@@ -771,7 +832,7 @@ void EDF01Mission::Execute(void)
 					}else{
 						SurvivorsMissing++;
 					}
-				}else if(IsOdf(survivor, ODF_TANK_FRIEND_SURVIVOR))
+				}else if(IsOdf(survivor, ODF_FRIEND_TANK_SURVIVOR))
 				{
 					Dist dist = GetDistance(survivor,"SafeNav");
 
@@ -785,9 +846,9 @@ void EDF01Mission::Execute(void)
 						}
 					}
 
-					if(dist <= 85 && BuddyIndex >= 0)
+					if(dist <= INT_SURVIVOR_DROPOFF_DISTANCE && BuddyIndex >= 0)
 					{
-						m_BuddyTanks[BuddyIndex] = ReplaceObject(survivor, ODF_TANK_FRIEND, true);
+						m_BuddyTanks[BuddyIndex] = ReplaceObject(survivor, ODF_FRIEND_TANK, true);
 						SetGroup(m_BuddyTanks[BuddyIndex],0);
 
 						m_Survivors[x] = m_SurvivorDropoffDropship;
@@ -881,21 +942,21 @@ void EDF01Mission::Execute(void)
 				}
 			}
 
-			if(SurvivorsRescued == 9 && SurvivorsLost == 1)
-			{
-				ClearObjectives();
-				AddObjective(_Text11,GREEN);
-				AudioMessage("edf01_06.wav");
-				SucceedMission(GetTime() + 15,"edf01W2.txt");
-				m_SurvivorChecksActive = false;
-			}
+			//if(SurvivorsRescued == 9 && SurvivorsLost == 1)
+			//{
+			//	ClearObjectives();
+			//	AddObjective(OBJECTIVE_TEXT_11,GREEN);
+			//	AudioMessage(AUDIO_06);
+			//	SucceedMission(GetTime() + 15,TEXT_WIN2);
+			//	m_SurvivorChecksActive = false;
+			//}
 
 			if(SurvivorsRescued == 10)
 			{
-				AudioMessage("edf01_06.wav");
+				AudioMessage(AUDIO_06);
 				ClearObjectives();
-				AddObjective(_Text9,GREEN);
-				SucceedMission(GetTime() + 15,"edf01W1.txt");
+				AddObjective(OBJECTIVE_TEXT_9,GREEN);
+				SucceedMission(GetTime() + 15,TEXT_WIN1);
 				m_SurvivorChecksActive = false;
 			}else if(SurvivorsRescued == 9 && SurvivorsLost == 0)
 			{
@@ -921,26 +982,26 @@ void EDF01Mission::Execute(void)
 				if(!m_NotedLostSurvivor)
 				{
 					ClearObjectives();
-					AddObjective(_Text10,RED);
-					AudioMessage("edf01_06a.wav");
+					AddObjective(OBJECTIVE_TEXT_10,RED);
+					AudioMessage(AUDIO_06A);
 					
 					m_NotedLostSurvivor = true;
 					m_SurvivorChecksWaitTillTime = m_ElapsedGameTime + (10 * m_GameTPS); //Wait,10
 				}else if(SurvivorsRescued == 9)// && !m_NoteAllRescued)
 				{
 					ClearObjectives();
-					AddObjective(_Text11,GREEN);
-					AudioMessage("edf01_06.wav");
-					SucceedMission(GetTime() + 15,"edf01W2.txt");
+					AddObjective(OBJECTIVE_TEXT_11,GREEN);
+					AudioMessage(AUDIO_06);
+					SucceedMission(GetTime() + 15,TEXT_WIN2);
 					m_SurvivorChecksActive = false;
 					//m_NoteAllRescued = true; // not needed as it would never hit here again due to survivor checks
 				}
 			}else if(SurvivorsLost >= 2)// && !m_NoteLossOfTwoSurvivors)
 			{
 				ClearObjectives();
-				AddObjective(_Text7,RED);
-				AudioMessage("edf01_07.wav");
-				FailMission(GetTime() + 15,"edf01L2.txt");
+				AddObjective(OBJECTIVE_TEXT_7,RED);
+				AudioMessage(AUDIO_07);
+				FailMission(GetTime() + 15,TEXT_LOSS2);
 				m_SurvivorChecksActive = false;
 				//m_NoteLossOfTwoSurvivors = true; // not needed as it would never hit here again due to survivor checks
 			}
@@ -958,14 +1019,14 @@ void EDF01Mission::Execute(void)
 				if(!m_StepOneOfTankCountFailDone)
 				{
 					ClearObjectives();
-					AddObjective(_Text6,RED);
-					AudioMessage("edf01_09.wav");
+					AddObjective(OBJECTIVE_TEXT_6,RED);
+					AudioMessage(AUDIO_09);
 
 					m_StepOneOfTankCountFailDone = true;
 					m_SurvivorChecksWaitTillTime = m_ElapsedGameTime + (9 * m_GameTPS); //Wait,9
 				}else{
-					AudioMessage("edf01_10.wav");
-					FailMission(GetTime() + 14,"edf01L1.txt");
+					AudioMessage(AUDIO_10);
+					FailMission(GetTime() + 14,TEXT_LOSS1);
 					m_SurvivorChecksActive = false;
 				}
 			}
@@ -973,20 +1034,20 @@ void EDF01Mission::Execute(void)
 			// a bit of overlapping delays here but really we want the win check to be more agressive because we aren't asshats
 			if (m_ElapsedGameTime >= m_AttackCountFailCheckWaitTillTime)
 			{
-				if(m_AttackerCountForFailCheck > 24)
+				if(m_AttackerCountForFailCheck > INT_ENEMY_SATURATION_MAX_COUNT)
 				{
 					if(SurvivorsMissing >= 1)
 					{
 						if(!m_StepOneOfEnemySpawnCountFailDone)
 						{
 							ClearObjectives();
-							AddObjective(_Text8,RED);
-							AudioMessage("edf01_08.wav");
+							AddObjective(OBJECTIVE_TEXT_8,RED);
+							AudioMessage(AUDIO_08);
 							m_AttackCountFailCheckWaitTillTime = m_ElapsedGameTime + (5 * m_GameTPS);//Wait,5
 							m_StepOneOfEnemySpawnCountFailDone = true;
 						}else{
-							AudioMessage("edf01_10.wav");
-							FailMission(GetTime() + 12,"edf01L3.txt");
+							AudioMessage(AUDIO_10);
+							FailMission(GetTime() + 12,TEXT_LOSS3);
 							m_SurvivorChecksActive = false;
 						}
 					}
