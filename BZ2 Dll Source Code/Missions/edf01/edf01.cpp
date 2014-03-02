@@ -1,10 +1,5 @@
 #include "edf01.h"
 
-#define TURQUOISE RGB(0,255,255)
-#define YELLOW RGB(255,255,0)
-#define BLUE RGB(0,0,255)
-#define VIOLET RGB(255,0,255)
-
 char* OBJECTIVE_TEXT_1 = "Your vehicle is equipped with\na special scanning device.\nScan the power source by\ngetting near it.";
 char* OBJECTIVE_TEXT_2 = "Hostiles are moving to attack!!\nTake action!";
 char* OBJECTIVE_TEXT_3 = "Have your subordinate tanks pick\nup the survivors, and bring them\nback to the dropships.  Only the\nsubordinate Sabres can get them.";
@@ -83,6 +78,8 @@ void EDF01Mission::Init(void)
 	//SetGravity(static_cast<float>(m_Gravity) * 0.5f);
 
 	m_SurvivorDropoffDropship = GetHandle("DropShip");
+
+	m_StopPlayerMoving = true;
 
 	// grab survivors
 	for(int x=0; x<10; x++)
@@ -333,7 +330,10 @@ void EDF01Mission::Execute(void)
 	if (!m_DidOneTimeInit)
 		Init();
 
-	/*if (!m_PlayerCanMove)
+	Handle localPlayer = GetPlayerHandle();
+	Handle tmpHandle = 0;
+
+	if (m_StopPlayerMoving)
 	{
 		VehicleControls controls;
 		controls.braccel = 0;
@@ -343,7 +343,7 @@ void EDF01Mission::Execute(void)
 		controls.eject = 0;
 		controls.abandon = 0;
 		controls.fire = 0;
-		SetControls(Object_Player, controls,
+		SetControls(localPlayer, controls,
 			CTRL_BRACCEL +
 			CTRL_STRAFE +
 			CTRL_JUMP +
@@ -352,10 +352,7 @@ void EDF01Mission::Execute(void)
 			CTRL_ABANDON +
 			CTRL_FIRE
 			);
-	}*/
-
-	Handle localPlayer = GetPlayerHandle();
-	Handle tmpHandle = 0;
+	}
 
 	if(m_ForceNavsToStay)
 	{
@@ -375,6 +372,7 @@ void EDF01Mission::Execute(void)
 				CameraFinish();
 				m_ShutlzPilotActionWaitTillTime = m_ElapsedGameTime + (m_GameTPS * 2);
 				m_ShutlzCamActive = false;
+				m_StopPlayerMoving = false;
 			}else if(m_ShutlzGoingToDropship)
 			{
 				RemoveObject(m_ShultzPilot);
@@ -442,6 +440,11 @@ void EDF01Mission::Execute(void)
 			Stop(m_ShultzTank,1);
 			SetObjectiveName(m_ShultzTank,"Schulz");
 			SetObjectiveOn(m_ShultzTank);
+
+			//////
+			//CameraReady();
+			//CameraObject(m_SurvivorDropoffDropship,m_ShultzEjectCameraBase.x,m_ShultzEjectCameraBase.y,m_ShultzEjectCameraBase.z,m_ShultzTank);
+			//////
 
 			m_ScanningMissionPhaseWaitTillTime = m_ElapsedGameTime + (4 * m_GameTPS);
 			m_ScanningMissionPhase++;
@@ -718,10 +721,8 @@ void EDF01Mission::Execute(void)
 			SetObjectiveOff(m_TargetPowerSourceForScanning);
 			m_SurvivorMissionPhase++;
 		case 8:
-			if(!IsAliveAndPilot2(m_HadeanObserver1)
-			&& GetTeamNum(m_HadeanObserver1) != 5
-			&& !IsAliveAndPilot2(m_HadeanObserver2)
-			&& GetTeamNum(m_HadeanObserver2) != 5)
+			if((!IsAliveAndPilot2(m_HadeanObserver1) || GetTeamNum(m_HadeanObserver1) != 5)
+			&& (!IsAliveAndPilot2(m_HadeanObserver2) || GetTeamNum(m_HadeanObserver2) != 5))
 				m_SurvivorMissionPhase++;
 			break;
 		case 9:
@@ -743,11 +744,15 @@ void EDF01Mission::Execute(void)
 			AudioMessage(AUDIO_05A);
 			m_ForceNavsToStay = true;
 			MakeNavs();
-			BuildObject(ODF_ENEMY_SCOUT,5,"Enemy2");
-			BuildObject(ODF_ENEMY_SCOUT,5,"Enemy3");
+			tmpHandle = BuildObject(ODF_ENEMY_SCOUT,5,"Enemy2");
+			Defend(tmpHandle);
+			tmpHandle = BuildObject(ODF_ENEMY_SCOUT,5,"Enemy3");
+			Defend(tmpHandle);
 
 			//////// Was part of a mysterious repeating routine in the BZS ////////
-			ClearObjectives();			AddObjective(OBJECTIVE_TEXT_3,WHITE);			AddObjective(OBJECTIVE_TEXT_4,WHITE);
+			ClearObjectives();
+			AddObjective(OBJECTIVE_TEXT_3,WHITE);
+			AddObjective(OBJECTIVE_TEXT_4,WHITE);
 			///////////////////////////////////////////////////////////////////////
 
 			m_SurvivorMissionPhaseWaitTillTime = m_ElapsedGameTime + (140 * m_GameTPS);
@@ -853,9 +858,6 @@ void EDF01Mission::Execute(void)
 
 						m_Survivors[x] = m_SurvivorDropoffDropship;
 
-						sprintf(TempMsgString,"Survivor Dropoff: %i safe",SurvivorsRescued);
-						SetObjectiveName(m_SurvivorDropoffNav,TempMsgString);
-
 						SurvivorsRescued++;
 					}else{
 						SurvivorsTransit++;
@@ -865,6 +867,9 @@ void EDF01Mission::Execute(void)
 					SurvivorsRescued++;
 				}
 			}
+
+			sprintf(TempMsgString,"Survivor Dropoff: %i safe",SurvivorsRescued);
+			SetObjectiveName(m_SurvivorDropoffNav,TempMsgString);
 
 			m_SurvivorSafeCount = SurvivorsRescued;
 
@@ -1058,68 +1063,6 @@ void EDF01Mission::Execute(void)
 
 	m_ElapsedGameTime++;
 }
-
-Vector EDF01Mission::GetVectorFromPath(Name path, int point)
-{
-	Vector retVal;
-	size_t bufSize = 0;
-	float* pData = NULL;
-	GetPathPoints(path, bufSize, pData);
-	if(point >= UnsignedToSigned(bufSize))
-		return Vector();
-	pData = new float[2 * bufSize];
-	if(GetPathPoints(path, bufSize, pData))
-		retVal = Vector(pData[2*point+0], TerrainFindFloor(pData[2*point+0], pData[2*point+1]), pData[2*point+1]);
-	delete[] pData;
-	return retVal;
-}
-
-int EDF01Mission::UnsignedToSigned(unsigned int x)
-{
-    if (x <= INT_MAX)
-        return static_cast<int>(x);
-
-    //if (x >= INT_MIN)
-	#pragma warning( push )
-	#pragma warning( disable : 4308)
-	if (x > INT_MIN - 1u) // MS compiler likes this more
-	#pragma warning( pop ) 
-        return static_cast<int>(x - INT_MIN) + INT_MIN;
-
-    throw x; // Or whatever else you like
-}
-
-Handle EDF01Mission::ReplaceObject(Handle h, char* odf, bool keepHealth)
-{
-	int Team = GetTeamNum(h);
-	Matrix M;
-	GetPosition(h, M);
-	long Health = GetCurHealth(h);
-	bool WasPlayer = IsPlayer(h);
-
-	if (IsAround(h))
-	{
-		RemoveObject(h);
-	}
-
-	strcpy(TempMsgString, odf);
-
-	Handle retVal = BuildObject(TempMsgString, Team, M);
-
-	if (WasPlayer)
-	{
-		SetAsUser(retVal, 1);
-	}
-
-	if (!keepHealth)
-	{
-		SetCurHealth(retVal, Health);
-	}
-
-	return retVal;
-}
-
-
 
 DLLBase * BuildMission(void)
 {

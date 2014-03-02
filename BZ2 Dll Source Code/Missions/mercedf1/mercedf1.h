@@ -1,9 +1,10 @@
 #ifndef MERCEDF1_H__
 #define MERCEDF1_H__
 
-#include "..\Shared\DLLBase.h"
+//#include "..\Shared\DLLBase.h"
+#include "..\Shared\RebuildMission.h"
 
-class EDF00Mission : public DLLBase//public SPMission 
+class EDF00Mission : public RebuildMission
 {
 public:
 	EDF00Mission(void)
@@ -165,9 +166,6 @@ private:
 	int m_powerPlayerStateMachineLast;
 	int m_Routine4StateMachineLast;
 	int m_CerbStateMachineLast;
-
-	Vector GetVectorFromPath(Name path, int point = 0);
-	int UnsignedToSigned(unsigned int x);
 };
 
 #endif // MERCEDF1_H__

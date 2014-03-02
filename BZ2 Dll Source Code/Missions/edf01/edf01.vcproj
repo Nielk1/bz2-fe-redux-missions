@@ -380,6 +380,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Shared\RebuildMission.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\Shared\SPMission.cpp"
 				>
 			</File>
@@ -402,6 +406,10 @@
 			</File>
 			<File
 				RelativePath="..\Shared\PUPMgr.h"
+				>
+			</File>
+			<File
+				RelativePath="..\Shared\RebuildMission.h"
 				>
 			</File>
 			<File

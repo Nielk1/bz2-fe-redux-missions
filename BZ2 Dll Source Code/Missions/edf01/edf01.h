@@ -1,10 +1,10 @@
 #ifndef edf01_H__
 #define edf01_H__
 
-#include "..\Shared\DLLBase.h"
-#include <cstring>
+//#include "..\Shared\DLLBase.h"
+#include "..\Shared\RebuildMission.h"
 
-class EDF01Mission : public DLLBase//public SPMission 
+class EDF01Mission : public RebuildMission 
 {
 public:
 	EDF01Mission(void)
@@ -41,6 +41,8 @@ public:
 		b_first,
 
 		m_DidOneTimeInit,
+
+		m_StopPlayerMoving,
 
 		m_ForceNavsToStay,
 
@@ -151,9 +153,9 @@ private:
 	void Preload();
 	void MakeNavs();
 
-	Vector GetVectorFromPath(Name path, int point = 0);
-	int UnsignedToSigned(unsigned int x);
-	Handle ReplaceObject(Handle h, char* odf, bool keepHealth = false);
+	//Vector GetVectorFromPath(Name path, int point = 0);
+	//int UnsignedToSigned(unsigned int x);
+	//Handle ReplaceObject(Handle h, char* odf, bool keepHealth = false);
 
 	//char m_StringWorkBuffer[200];
 };

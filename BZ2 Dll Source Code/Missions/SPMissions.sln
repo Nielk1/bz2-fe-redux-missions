@@ -4,6 +4,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mercedf1", "mercedf1\merced
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "edf01", "edf01\edf01.vcproj", "{1C46B1C0-AEE5-405A-B2DD-4B8D37A33137}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "edf02", "edf02\edf02.vcproj", "{8FC117CB-F4A4-484B-90DF-741DED893771}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -23,6 +25,12 @@ Global
 		{1C46B1C0-AEE5-405A-B2DD-4B8D37A33137}.Release|Win32.Build.0 = Release|Win32
 		{1C46B1C0-AEE5-405A-B2DD-4B8D37A33137}.ReleaseEditor|Win32.ActiveCfg = ReleaseEditor|Win32
 		{1C46B1C0-AEE5-405A-B2DD-4B8D37A33137}.ReleaseEditor|Win32.Build.0 = ReleaseEditor|Win32
+		{8FC117CB-F4A4-484B-90DF-741DED893771}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8FC117CB-F4A4-484B-90DF-741DED893771}.Debug|Win32.Build.0 = Debug|Win32
+		{8FC117CB-F4A4-484B-90DF-741DED893771}.Release|Win32.ActiveCfg = Release|Win32
+		{8FC117CB-F4A4-484B-90DF-741DED893771}.Release|Win32.Build.0 = Release|Win32
+		{8FC117CB-F4A4-484B-90DF-741DED893771}.ReleaseEditor|Win32.ActiveCfg = ReleaseEditor|Win32
+		{8FC117CB-F4A4-484B-90DF-741DED893771}.ReleaseEditor|Win32.Build.0 = ReleaseEditor|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

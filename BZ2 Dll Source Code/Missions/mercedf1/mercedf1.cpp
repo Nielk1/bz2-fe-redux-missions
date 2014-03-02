@@ -1,27 +1,22 @@
 #include "mercedf1.h"
 
-#define TURQUOISE RGB(0,255,255)
-#define YELLOW RGB(255,255,0)
-#define BLUE RGB(0,0,255)
-#define VIOLET RGB(255,0,255)
+char* OBJECTIVE_TEXT_1 = "Protect your assigned transport,\nhighlighted with a blue beacon.\nIt's carrying biometal-refining\nmodules for our Recycler, so\ndon't lose it!";
+char* OBJECTIVE_TEXT_2 = "Follow Major Wyndt-Essex. Stay\nin loose formation, and cover\nher as necessary.";
+char* OBJECTIVE_TEXT_3 = "Take out the gun tower near\nthe bridge. Major Wyndt-Essex\nwill stay out of range and watch\nfor enemy patrols.";
+char* OBJECTIVE_TEXT_4 = "Now, take out the power supply.\nAnd hurry up; the Major says you\nare taking far too long!";
+char* OBJECTIVE_TEXT_5 = "ATTENTION ALL UNITS: Begin to\nboard the StormPetrel in an\norderly fashion.";
+char* OBJECTIVE_TEXT_6 = "Follow Hardin and head over to\nthe Training Center at the base.\nHop out of your vehicle and join\nthe General inside.";
+char* OBJECTIVE_TEXT_7 = "Get into the StormPetrel.";
+char* OBJECTIVE_TEXT_8 = "Your negligence and cowardice\nhave led to the death of Major\nWyndt-Essex.";
+char* OBJECTIVE_TEXT_9 = "General Hardin is dead, and\nwith him all our hopes for \ndefending Earth from the Hadean\ninvasion.";
+char* OBJECTIVE_TEXT_10 = "You failed to protect the\ntransport as directed. Without\nthe biometal-refining modules,\nour mission cannot continue.\nPrepare to head back to Earth.";
+char* OBJECTIVE_TEXT_11 = "Defend the transports in the\nconvoy. Each one is carrying\ncritical components necessary\nfor our mission's success.";
+char* OBJECTIVE_TEXT_12 = "haha, you lazy mpi players\njust plain suck. LOL";
 
-char* _Text1 = "Protect your assigned transport,\nhighlighted with a blue beacon.\nIt's carrying biometal-refining\nmodules for our Recycler, so\ndon't lose it!";
-char* _Text2 = "Follow Major Wyndt-Essex. Stay\nin loose formation, and cover\nher as necessary.";
-char* _Text3 = "Take out the gun tower near\nthe bridge. Major Wyndt-Essex\nwill stay out of range and watch\nfor enemy patrols.";
-char* _Text4 = "Now, take out the power supply.\nAnd hurry up; the Major says you\nare taking far too long!";
-char* _Text5 = "ATTENTION ALL UNITS: Begin to\nboard the StormPetrel in an\norderly fashion.";
-char* _Text6 = "Follow Hardin and head over to\nthe Training Center at the base.\nHop out of your vehicle and join\nthe General inside.";
-char* _Text7 = "Get into the StormPetrel.";
-char* _Text8 = "Your negligence and cowardice\nhave led to the death of Major\nWyndt-Essex.";
-char* _Text9 = "General Hardin is dead, and\nwith him all our hopes for \ndefending Earth from the Hadean\ninvasion.";
-char* _Text10 = "You failed to protect the\ntransport as directed. Without\nthe biometal-refining modules,\nour mission cannot continue.\nPrepare to head back to Earth.";
-char* _Text11 = "Defend the transports in the\nconvoy. Each one is carrying\ncritical components necessary\nfor our mission's success.";
-char* _Text12 = "haha, you lazy mpi players\njust plain suck. LOL";
-
-#define DRONEODF "nadir"
-#define SCOUTODF "ivscout11"
-#define SERVODF "ivserv"
-#define CARGOODF "ivcargo"
+#define ODF_ENEMY_DRONE "nadir"
+#define ODF_FRIEND_SCOUT "ivscout11"
+#define ODF_FRIEND_SERV "ivserv"
+#define ODF_FRIEND_CARGO "ivcargo"
 
 void EDF00Mission::Init(void)
 {
@@ -320,29 +315,29 @@ void EDF00Mission::Execute(void)
 		//RemoveObject(Object_LandingZone);
 		SetGroup(Object_WyndtEssex,10);
 		SetObjectiveName(Object_WyndtEssex,"Wyndt-Essex");
-		//Object_Hardin = BuildObject(SCOUTODF,9,Position_HardingNav1);
-		Object_Hardin = BuildObject(SCOUTODF,9,"hardin_spawn");
-		//Object_Hardin = BuildObject(SCOUTODF,9,GetVectorFromPath("hardin_spawn"));
+		//Object_Hardin = BuildObject(ODF_FRIEND_SCOUT,9,Position_HardingNav1);
+		Object_Hardin = BuildObject(ODF_FRIEND_SCOUT,9,"hardin_spawn");
+		//Object_Hardin = BuildObject(ODF_FRIEND_SCOUT,9,GetVectorFromPath("hardin_spawn"));
 		SetObjectiveName(Object_Hardin,"Hardin");
-		Object_Scout1 = BuildObject(SCOUTODF,9,"red_spawn");
-		Object_Scout2 = BuildObject(SCOUTODF,9,"red_spawn");
-		Object_Scout3 = BuildObject(SCOUTODF,9,"blue_spawn");
-		Object_ServTruck1 = BuildObject(SERVODF,1,"blue_spawn");
+		Object_Scout1 = BuildObject(ODF_FRIEND_SCOUT,9,"red_spawn");
+		Object_Scout2 = BuildObject(ODF_FRIEND_SCOUT,9,"red_spawn");
+		Object_Scout3 = BuildObject(ODF_FRIEND_SCOUT,9,"blue_spawn");
+		Object_ServTruck1 = BuildObject(ODF_FRIEND_SERV,1,"blue_spawn");
 		SetGroup(Object_ServTruck1,10);
 		{
 			Vector Position_LandingZone = GetVectorFromPath("landing_zone");
 			Position_LandingZone.x += 1;
 			Position_LandingZone.y += 1;
 			Position_LandingZone.z += 1;
-			Object_ServTruck2 = BuildObject(SERVODF,9,Position_LandingZone);
+			Object_ServTruck2 = BuildObject(ODF_FRIEND_SERV,9,Position_LandingZone);
 			Position_LandingZone.x += 10;
 			//Position_LandingZone.y += 0;
 			//Position_LandingZone.z += 0;
-			Object_Cargo1 = BuildObject(CARGOODF,9,Position_LandingZone);
+			Object_Cargo1 = BuildObject(ODF_FRIEND_CARGO,9,Position_LandingZone);
 			Position_LandingZone.x += -15;
 			//Position_LandingZone.y += 0;
 			//Position_LandingZone.z += 0;
-			Object_Cargo2 = BuildObject(CARGOODF,9,Position_LandingZone);
+			Object_Cargo2 = BuildObject(ODF_FRIEND_CARGO,9,Position_LandingZone);
 		}
 		m_convoyStateMachine++;
 		break;
@@ -394,7 +389,7 @@ void EDF00Mission::Execute(void)
 		break;
 	case 16:
 		SetObjectiveOn(Object_Cargo2);
-		AddObjective(_Text1, WHITE);
+		AddObjective(OBJECTIVE_TEXT_1, WHITE);
 		StopEarthQuake();
 		SetAnimation(Object_Condor,"deploy",1);
 		StartAnimation(Object_Condor);
@@ -426,7 +421,7 @@ void EDF00Mission::Execute(void)
 			m_convoyStateMachine++;
 		break;
 	case 20:
-		Object_Nadir1 = BuildObject(DRONEODF,2,"NadirAttackSpawn");
+		Object_Nadir1 = BuildObject(ODF_ENEMY_DRONE,2,"NadirAttackSpawn");
 		SetPerceivedTeam(Object_Nadir1,1);
 		Attack(Object_Nadir1,Object_Cargo2,1);
 		AudioMessage("mercury_02a.wav");
@@ -459,7 +454,7 @@ void EDF00Mission::Execute(void)
 		break;
 	case 25:
 		ClearObjectives();
-		AddObjective(_Text2,WHITE);
+		AddObjective(OBJECTIVE_TEXT_2,WHITE);
 		m_runPowerAIStateMachine = true;
 		m_runPowerPlayerStateMachine = true;
 		m_convoyStateMachine++;
@@ -489,7 +484,7 @@ void EDF00Mission::Execute(void)
 		break;
 	case 28:
 		AudioMessage("mercury_07.wav");
-		AddObjective(_Text11,WHITE);
+		AddObjective(OBJECTIVE_TEXT_11,WHITE);
 		m_convoyStateMachine++;
 		break;
 	case 29:
@@ -542,7 +537,7 @@ void EDF00Mission::Execute(void)
 				Retreat(Object_Scout3,"hardin",1);
 				ClearObjectives();
 				LookAt(Object_Hardin,Object_Player,1);
-				AddObjective(_Text6,WHITE);
+				AddObjective(OBJECTIVE_TEXT_6,WHITE);
 				AudioMessage("mercury_08.wav");
 				SetObjectiveName(Object_Corbernav,"Enter StormPetrel here");
 				SetTeamNum(Object_Gun1,0);
@@ -588,7 +583,7 @@ void EDF00Mission::Execute(void)
 		StartEarthQuake(4.0);
 		m_CerbRoutine = false;
 		ClearObjectives();
-		AddObjective(_Text5,GREEN);
+		AddObjective(OBJECTIVE_TEXT_5,GREEN);
 		AudioMessage("mercury_08a.wav");
 		HopOut(Object_Scout2);
 		HopOut(Object_Scout3);
@@ -728,7 +723,7 @@ void EDF00Mission::Execute(void)
 			SetObjectiveOn(Object_WyndtEssex);
 			LookAt(Object_WyndtEssex,Object_Player,1);
 			AudioMessage("mercury_04.wav"); // Essex >> Follow me leutenent
-			Object_Nadir1 = BuildObject(DRONEODF,2,"NadirAttackSpawn");
+			Object_Nadir1 = BuildObject(ODF_ENEMY_DRONE,2,"NadirAttackSpawn");
 			Attack(Object_Nadir1,Object_WyndtEssex,1);
 			//Position_Rodnav2 = GetPosition(Object_Rodnav2);
 			//Object_NavForCerbUnit = BuildObject("ibnav",4,Position_NavForCerbUnit);
@@ -766,7 +761,7 @@ void EDF00Mission::Execute(void)
 			break;
 		case 6:
 			ClearObjectives();
-			AddObjective(_Text3,WHITE);
+			AddObjective(OBJECTIVE_TEXT_3,WHITE);
 			m_CerbRoutine = true;
 			SetObjectiveOn(Object_Gun10);
 			m_powerPlayerStateMachine++;
@@ -779,8 +774,8 @@ void EDF00Mission::Execute(void)
 			//Goto(Object_WyndtEssex,Object_Rodnav2,1);
 			Goto(Object_WyndtEssex,"blue_goto_power_2",1);
 			ClearObjectives();
-			AddObjective(_Text3,GREEN);
-			AddObjective(_Text4,WHITE);
+			AddObjective(OBJECTIVE_TEXT_3,GREEN);
+			AddObjective(OBJECTIVE_TEXT_4,WHITE);
 			m_powerPlayerWaitTillTime = m_ElapsedGameTime + (22 * m_GameTPS);
 			m_powerPlayerStateMachine++;
 			break;
@@ -803,11 +798,11 @@ void EDF00Mission::Execute(void)
 		case 12:
 			SetTeamNum(Object_Radar2,0);
 			ClearObjectives();
-			AddObjective(_Text2,WHITE);
+			AddObjective(OBJECTIVE_TEXT_2,WHITE);
 			AudioMessage("mercury_06.wav");
 			Goto(Object_WyndtEssex,"path_1",1);
-			Object_Nadir1 = BuildObject(DRONEODF,2,"NadirAttackSpawn");
-			Object_Nadir2 = BuildObject(DRONEODF,2,"NadirAttackSpawn");
+			Object_Nadir1 = BuildObject(ODF_ENEMY_DRONE,2,"NadirAttackSpawn");
+			Object_Nadir2 = BuildObject(ODF_ENEMY_DRONE,2,"NadirAttackSpawn");
 			Object_Player = GetPlayerHandle();
 			Attack(Object_Nadir1,Object_WyndtEssex,1);
 			Attack(Object_Nadir2,Object_Player,1);
@@ -842,9 +837,9 @@ void EDF00Mission::Execute(void)
 			break;
 		case 16:
 			Object_Player = GetPlayerHandle();
-			Object_Nadir1 = BuildObject(DRONEODF,2,"NadirAttackSpawn");
-			Object_Nadir2 = BuildObject(DRONEODF,2,"NadirAttackSpawn");
-			Object_Nadir3 = BuildObject(DRONEODF,2,"NadirAttackSpawn");
+			Object_Nadir1 = BuildObject(ODF_ENEMY_DRONE,2,"NadirAttackSpawn");
+			Object_Nadir2 = BuildObject(ODF_ENEMY_DRONE,2,"NadirAttackSpawn");
+			Object_Nadir3 = BuildObject(ODF_ENEMY_DRONE,2,"NadirAttackSpawn");
 			Attack(Object_Nadir1,Object_WyndtEssex,1);
 			Attack(Object_Nadir2,Object_Cargo2,1);
 			Attack(Object_Nadir3,Object_Player,1);
@@ -867,10 +862,10 @@ void EDF00Mission::Execute(void)
 				m_powerPlayerStateMachine++;
 			break;
 		case 21: // repeated attack wave spawn
-			Object_Nadir1 = BuildObject(DRONEODF,2,"NadirAttackSpawn");
-			Object_Nadir2 = BuildObject(DRONEODF,2,"NadirAttackSpawn");
-			Object_Nadir3 = BuildObject(DRONEODF,2,"NadirAttackSpawn");
-			Object_Nadir4 = BuildObject(DRONEODF,2,"NadirAttackSpawn");
+			Object_Nadir1 = BuildObject(ODF_ENEMY_DRONE,2,"NadirAttackSpawn");
+			Object_Nadir2 = BuildObject(ODF_ENEMY_DRONE,2,"NadirAttackSpawn");
+			Object_Nadir3 = BuildObject(ODF_ENEMY_DRONE,2,"NadirAttackSpawn");
+			Object_Nadir4 = BuildObject(ODF_ENEMY_DRONE,2,"NadirAttackSpawn");
 			Attack(Object_Nadir1,Object_Player,1);
 			Attack(Object_Nadir2,Object_Player,1);
 			Goto(Object_Nadir3,"hardin",1);
@@ -884,17 +879,17 @@ void EDF00Mission::Execute(void)
 		if(!IsAround(Object_WyndtEssex))
 		{
 			ClearObjectives();
-			AddObjective(_Text8,RED);
+			AddObjective(OBJECTIVE_TEXT_8,RED);
 			FailMission(10,"rodmerc.des");
 		}else if(!IsAround(Object_Cargo2))
 		{
 			ClearObjectives();
-			AddObjective(_Text10,RED);
+			AddObjective(OBJECTIVE_TEXT_10,RED);
 			FailMission(10,"transmerc.des");
 		}else if(!IsAround(Object_Hardin))
 		{
 			ClearObjectives();
-			AddObjective(_Text9,RED);
+			AddObjective(OBJECTIVE_TEXT_9,RED);
 			FailMission(10,"hardmerc.des");
 		}
 	}
@@ -978,7 +973,7 @@ void EDF00Mission::Execute(void)
 					{
 						Object_Player = GetPlayerHandle();
 						EjectPilot(Object_Player);
-						AddObjective(_Text12,VIOLET);
+						AddObjective(OBJECTIVE_TEXT_12,VIOLET);
 						m_CerbStateMachine++;
 					}
 				}
@@ -1036,36 +1031,6 @@ void EDF00Mission::Execute(void)
 	}
 
 	m_ElapsedGameTime++;
-}
-
-Vector EDF00Mission::GetVectorFromPath(Name path, int point)
-{
-	Vector retVal;
-	size_t bufSize = 0;
-	float* pData = NULL;
-	GetPathPoints(path, bufSize, pData);
-	if(point >= UnsignedToSigned(bufSize))
-		return Vector();
-	pData = new float[2 * bufSize];
-	if(GetPathPoints(path, bufSize, pData))
-		retVal = Vector(pData[2*point+0], TerrainFindFloor(pData[2*point+0], pData[2*point+1]), pData[2*point+1]);
-	delete[] pData;
-	return retVal;
-}
-
-int EDF00Mission::UnsignedToSigned(unsigned int x)
-{
-    if (x <= INT_MAX)
-        return static_cast<int>(x);
-
-    //if (x >= INT_MIN)
-	#pragma warning( push )
-	#pragma warning( disable : 4308)
-	if (x > INT_MIN - 1u) // MS compiler likes this more
-	#pragma warning( pop ) 
-        return static_cast<int>(x - INT_MIN) + INT_MIN;
-
-    throw x; // Or whatever else you like
 }
 
 DLLBase * BuildMission(void)
