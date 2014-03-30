@@ -11,3 +11,13 @@
 *.lai
 *.la
 *.a
+
+# Problematic Visual Studio files
+*.ncb
+*.suo
+*.user
+
+/bz2 dll source code/Build
+/bz2 dll source code/Output
+*.ncb
+*.suo

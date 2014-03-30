@@ -17,7 +17,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\Debug\missions\"
+			OutputDirectory="..\..\Output\missions\"
 			IntermediateDirectory="$(SolutionDir)\..\Build\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
@@ -129,7 +129,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\Debug\missions\"
+			OutputDirectory="..\..\Output\missions\"
 			IntermediateDirectory="$(SolutionDir)\..\Build\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
@@ -245,7 +245,7 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseEditor|Win32"
-			OutputDirectory="..\..\Debug\missions\"
+			OutputDirectory="..\..\Output\missions\"
 			IntermediateDirectory="$(SolutionDir)\..\Build\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"

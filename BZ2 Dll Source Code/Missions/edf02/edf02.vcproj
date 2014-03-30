@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="mercedf1"
-	ProjectGUID="{C83B586D-8FA2-42B4-B773-9449260E1F2C}"
-	RootNamespace="mercedf1"
+	Name="edf02"
+	ProjectGUID="{8FC117CB-F4A4-484B-90DF-741DED893771}"
+	RootNamespace="edf02"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -30,6 +30,7 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -43,7 +44,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Debug/mercedf1.tlb"
+				TypeLibraryName=".\Debug/edf02.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -125,6 +126,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description=""
+				CommandLine=""
 			/>
 		</Configuration>
 		<Configuration
@@ -157,7 +160,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Release/mercedf1.tlb"
+				TypeLibraryName=".\Release/edf02.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -273,7 +276,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Release/mercedf1.tlb"
+				TypeLibraryName=".\Release/edf02.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -372,7 +375,7 @@
 				>
 			</File>
 			<File
-				RelativePath="mercedf1.cpp"
+				RelativePath="edf02.cpp"
 				>
 			</File>
 			<File
@@ -397,7 +400,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\mercedf1.h"
+				RelativePath=".\edf02.h"
 				>
 			</File>
 			<File
