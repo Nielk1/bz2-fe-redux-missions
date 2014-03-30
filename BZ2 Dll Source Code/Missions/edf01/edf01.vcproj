@@ -380,10 +380,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\Shared\RebuildMission.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\Shared\SPMission.cpp"
 				>
 			</File>
