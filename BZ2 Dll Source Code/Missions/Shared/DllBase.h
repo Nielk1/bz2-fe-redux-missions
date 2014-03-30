@@ -65,6 +65,61 @@ public:
 	virtual void ProcessCommand(unsigned long crc);
 	virtual void SetRandomSeed(unsigned long seed);
 
+	// Items added after 1.3.6.4 public beta
+
+	// Notification to the DLL: a sniper shell has hit a piloted
+	// craft. The exe passes the current world, shooters handle,
+	// victim handle, and the ODF string of the ordnance involved in
+	// the snipe. Returns a code detailing what to do.
+	//
+	// !! Note : If DLLs want to do any actions to the world based on this
+	// PreSnipe callback, they should (1) Ensure curWorld == 0 (lockstep)
+	// -- do NOTHING if curWorld is != 0, and (2) probably queue up an
+	// action to do in the next Execute() call.
+	virtual PreSnipeReturnCodes PreSnipe(const int curWorld, Handle shooterHandle, Handle victimHandle, int ordnanceTeam, char* pOrdnanceODF);
+
+	// Notification to the DLL: ordnance has hit something. This
+	// passes the shooters handle, victim handle, ordnance's team, and
+	// the ODF string of the ordnance involved. Note that the shooters
+	// handle *might* be invalid -- consider a mortar (or other slow
+	// ordnance) launched by a craft just before that craft
+	// explodes. By the time that mortar lands, the shooter is dead.
+	// Thus the ordnance's team is also passed as a possible fallback
+	// for identification.
+	//
+	// This call may not quite catch all ordnance hit events yet; anything
+	// derived from a Bullet will probably work well. Anything else may or
+	// may not work.  For sniper shells hitting targets, they should
+	// always generate a PreOrdnanceHitCallback (in the lockstep world),
+	// followed by (an optional) PreSnipeCallback if the sniper shell hit
+	// a snipable cockpit, etc. In visual worlds, sniper shells will only
+	// generate the PreSnipeCallback.
+	//
+	virtual void PreOrdnanceHit(Handle shooterHandle, Handle victimHandle, int ordnanceTeam, char* pOrdnanceODF);
+
+	// Notification to the DLL: called when a pilot tries to enter an
+	// empty craft, and all other checks (i.e. craft is empty, masks
+	// match, etc) have passed. DLLs can prevent that pilot from
+	// entering the craft if desired.
+	//
+	// !! Note : If DLLs want to do any actions to the world based on this
+	// PreSnipe callback, they should (1) Ensure curWorld == 0 (lockstep)
+	// -- do NOTHING if curWorld is != 0, and (2) probably queue up an
+	// action to do in the next Execute() call.
+	virtual PreGetInReturnCodes PreGetIn(const int curWorld, Handle pilotHandle, Handle emptyCraftHandle);
+
+	// Notification to the DLL: called when a pilot/craft is about to
+	// pickup a power up, and all other checks have passed. DLLs can
+	// prevent that pick up if desired.
+	//
+	// !! Note : If DLLs want to do any actions to the world based on this
+	// PreSnipe callback, they should (1) Ensure curWorld == 0 (lockstep)
+	// -- do NOTHING if curWorld is != 0, and (2) probably queue up an
+	// action to do in the next Execute() call.
+	virtual PrePickupPowerupReturnCodes PrePickupPowerup(const int curWorld, Handle me, Handle powerupHandle);
+
+	// Notification to the DLL: called when a pilot/craft has changed targets
+	virtual void PostTargetChangedCallback(Handle craft, Handle previousTarget, Handle currentTarget);
 };
 
 // Function to create a new instance of your mission class. Must be present in project

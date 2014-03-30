@@ -10,6 +10,8 @@
 #endif
 #endif
 
+#define DLLAPI __cdecl
+
 // DLL versioning code to make sure things are in sync between app and
 // dll-- this magic # should be changed every time the misnExport
 // structure changes to trap old DLLs. This magic # was chosen
@@ -25,7 +27,8 @@
 #define LATEST_DLL_VERSION_MODIFIER '~GSH'
 
 // Set of return codes from the PlayerEjected/PlayerKilled call to DLL
-enum EjectKillRetCodes {
+enum EjectKillRetCodes 
+{
 	DoEjectPilot, // Do 'standard' eject
 	DoRespawnSafest, // Respawn a 'PLAYER' at safest spawnpoint
 	DLLHandled, // DLL handled actions. Do nothing ingame
@@ -34,7 +37,8 @@ enum EjectKillRetCodes {
 
 // Deathmatch01.DLL game subtypes (ivar7) list. Used to synchronize UI
 // and gameplay behavior between main code and DLL
-enum DeathmatchGameSubtypes {
+enum DeathmatchGameSubtypes 
+{
 	DMSubtype_Normal=0,
 	DMSubtype_KOH,
 	DMSubtype_CTF,
@@ -49,9 +53,31 @@ enum DeathmatchGameSubtypes {
 // For activating the #Laps interface, and behaving like a race DLL
 const bool DMIsRaceSubtype[DMSUBTYPE_COUNT]={false,false,false,false,false,true,true,false};
 
-enum PathType;
+// Return codes from the PreSnipe DLL callback
+enum PreSnipeReturnCodes 
+{
+	PRESNIPE_KILLPILOT, // Kill the pilot (1.0-1.3.6.4 default). Does still pass this to bullet hit code, where damage might also be applied
+	PRESNIPE_ONLYBULLETHIT, // Do not kill the pilot. Does still pass this to bullet hit code, where damage might also be applied
 
-#define DLLAPI __cdecl
+	// Might be implemented in the future, no guarantees
+	// PRESNIPE_DONOTHING, // Do not kill the pilot. Does NOT continue to bullet hit code, where damage might be applied
+};
+
+// Return codes from the PreGetIn DLL callback
+enum PreGetInReturnCodes 
+{
+	PREGETIN_DENY, // Deny the pilot entry to the craft
+	PREGETIN_ALLOW, // Allow the pilot entry
+};
+
+// Return codes from the PrePickupPowerup DLL callback
+enum PrePickupPowerupReturnCodes 
+{
+	PREPICKUPPOWERUP_DENY, // Deny the powerup from being picked up
+	PREPICKUPPOWERUP_ALLOW, // Allow the powerup to be picked up
+};
+
+enum PathType;
 
 #if MISN_INTERNAL
 #include <stdio.h>
@@ -121,6 +147,16 @@ struct Matrix
 // implement utility functions in the dll (ie SPMission)
 Vector Normalize_Vector (const Vector &A);
 
+// Return values for the GetTeamRelationship() call
+// !! This must be kept in sync with the parallel enum in Entities.h
+enum TEAMRELATIONSHIP 
+{
+	TEAMRELATIONSHIP_INVALIDHANDLE, // One or both handles is invalid
+	TEAMRELATIONSHIP_SAMETEAM, // Team # for both items is the same
+	TEAMRELATIONSHIP_ALLIEDTEAM, // Team # isn't identical, but teams are allied
+	TEAMRELATIONSHIP_ENEMYTEAM, // Team # isn't identical, and teams are enemies
+};
+
 #endif
 
 typedef char* Name;
@@ -162,6 +198,39 @@ struct VehicleControls {
 	char abandon;
 	char fire;
 };
+
+// Typedef for the PreSnipe callback. Is passed the current world
+// (0=lockstep, 1 or 2 = visual world), two handles (shooter and
+// victim), ordnance's team # (as shooter handle might have expired)
+// and also the ODF string of the ordnance involved in the
+// snipe. Returns a code detailing what to do.
+typedef PreSnipeReturnCodes (DLLAPI *PreSnipeCallback)(const int curWorld, Handle shooterHandle, Handle victimHandle, int ordnanceTeam, char* pOrdnanceODF);
+
+// Typedef for the PreOrdnanceHit callback. Is passed two handles
+// (shooter and victim), and also the ODF string of the ordnance
+// involved in the snipe. Returns nothing.
+typedef void (DLLAPI *PreOrdnanceHitCallback)(Handle shooterHandle, Handle victimHandle, int ordnanceTeam, char* pOrdnanceODF);
+
+
+// Typedef for the PreGetIn callback - allows the DLL to be notified
+// and/or do logic when a pilot tries to get into an empty craft. Is
+// passed the current world (0=lockstep, 1 or 2 = visual world), two
+// handles (pilot and empty craft). Returns a code detailing what to
+// do.
+typedef PreGetInReturnCodes (DLLAPI *PreGetInCallback)(const int curWorld, Handle pilotHandle, Handle emptyCraftHandle);
+
+// Typedef for the PrePickupPowerup callback - allows the DLL to be
+// notified and/or do logic when a pilot/craft is about to pick up a
+// powerup. Is passed the current world (0=lockstep, 1 or 2 = visual
+// world), two handles ( and empty craft). Returns a code
+// detailing what to do.
+typedef PrePickupPowerupReturnCodes (DLLAPI *PrePickupPowerupCallback)(const int curWorld, Handle me, Handle powerupHandle);
+
+// Typedef for the PostTargetChanged callback. Is passed the handle of
+// the pilot/craft changing targets, and two handles -- previous &
+// current target. Returns nothing.
+typedef void (DLLAPI *PostTargetChangedCallback)(Handle craft, Handle previousTarget, Handle currentTarget);
+
 
 // functions called by mission
 // Changes in MisnImport do _NOT_ require changes to LATEST_DLL_VERSION
@@ -240,12 +309,35 @@ struct MisnExport {
 	void (DLLAPI *SetRandomSeed)(unsigned long seed);
 };
 
+// Items added after BZ2 1.3.6.4 public beta. This struct is internal
+// to the BZ2 exe, and used only by the exe. It is filled in by
+// callbacks to set these extra handlers below.
+struct MisnExport2 
+{
+	PostTargetChangedCallback	m_pPostTargetChangedCallback;
+	PreGetInCallback			m_pPreGetInCallback;
+	PreOrdnanceHitCallback		m_pPreOrdnanceHitCallback;
+	PrePickupPowerupCallback	m_pPrePickupPowerupCallback;
+	PreSnipeCallback			m_pPreSnipeCallback;
+
+	// Constructor - sets all callbacks to unsubscribed
+	MisnExport2()
+	{
+		m_pPostTargetChangedCallback = NULL;
+		m_pPreGetInCallback = NULL;
+		m_pPreOrdnanceHitCallback = NULL;
+		m_pPrePickupPowerupCallback = NULL;
+		m_pPreSnipeCallback = NULL;
+	}
+};
+
 #if MISN_INTERNAL
 extern MisnImport misnImport;
 extern "C" MisnExport __declspec(dllexport) * DLLAPI GetMisnAPI(MisnImport *import);
 #define DLLEXPORT __declspec( dllimport )
 #else
 extern MisnExport *misnExport;
+extern MisnExport2 *misnExport2;
 void FillMisnImport(MisnImport &misnImport);
 #define DLLEXPORT __declspec( dllexport )
 #endif
@@ -1581,7 +1673,7 @@ DLLEXPORT void DLLAPI SetLifespan(Handle h, float timeout);
 // Returns false when it doesn't. This differs from DoesODFExist
 // in that you should pass in the extension, e.g.
 //
-//   DoesFileExist("MPVehicles.txt");
+//   DoesFileExist("MPVehicles.odf");
 //   DoesFileExist("stock13_ff0.aip");
 DLLEXPORT bool DLLAPI DoesFileExist(const char* filename);
 
@@ -1990,9 +2082,9 @@ DLLEXPORT bool DLLAPI IsTeamAllied(TeamNum t1, TeamNum t2);
 // fully been killed yet.
 DLLEXPORT bool DLLAPI IsNotDeadAndPilot2(Handle h);
 
-// Name accessors. This is the label set on items. Note - for GetName,
+// Name accessors. This is the label set on items. Note - for GetLabel,
 // if you want to store the returned value long-term, copy it off. The
-// next call to GetName will overwrite the value. Also, NULL will be
+// next call to GetLabel will overwrite the value. Also, NULL will be
 // returned if the handle is invalid.
 DLLEXPORT const char* DLLAPI GetLabel(Handle h);
 DLLEXPORT void DLLAPI SetLabel(Handle h, const char* pLabel);
@@ -2042,6 +2134,141 @@ DLLEXPORT const char* DLLAPI GetNetworkListItem(NETWORK_LIST_TYPE listType, size
 // invalid listType is passed in.
 DLLEXPORT size_t DLLAPI GetNetworkListCount(NETWORK_LIST_TYPE listType);
 
+// Gets the team relationship between the two handles. See the enum
+// TEAMRELATIONSHIP for what values can be returned, and what they mean
+DLLEXPORT TEAMRELATIONSHIP DLLAPI GetTeamRelationship(Handle h1, Handle h2);
+
+// Checks if the handle has a pilot. Note - if h is invalid or points
+// to something that cannot have a pilot, false is returned.
+DLLEXPORT bool DLLAPI HasPilot(Handle h);
+
+// Matches SetPilotClass(), returns the odf of the pilot in use in
+// this craft. Note - if h is invalid or points to something that
+// cannot have a pilot, NULL is returned. Please verify pointer before
+// use.
+DLLEXPORT const char* DLLAPI GetPilotClass(Handle h);
+
+
+// Goto(me, Vector(x,y,z)). Note: if pos.y is underground, then it is
+// corrected to ground height. Note that BZ2 is still a mostly 2D game
+// for AI and pathing, so the pos.y might be mostly or fully ignored
+// if pos.y is above ground height.
+DLLEXPORT void DLLAPI Goto(Handle me, const Vector& pos, int priority = 1);
+
+
+// Gets the base scrap cost for a unit. This is the unmodified scrap
+// cost of the basic unit, which may or may not apply to the given
+// handle. Returns 0 if the handle is invalid.
+DLLEXPORT int DLLAPI GetBaseScrapCost(Handle h);
+
+
+// Gets the actual scrap cost for a unit. This is the scrap cost of
+// the basic unit, plus the cost of customizations, weapon pods,
+// ammo/health pods, etc, as applicable. Returns 0 if the handle is
+// invalid.
+//
+// !! Note: for now, the exe will only return the base scrap cost
+// here. !!
+DLLEXPORT int DLLAPI GetActualScrapCost(Handle h);
+
+
+// Helper function - 'pets' the watchdog thread so it doesn't bite
+// soon. This is to be used sparingly -- DLLs shouldn't normally be
+// able to block the game for 15+ seconds w/o rendering a frame. But,
+// if doing a lot of AdObject() calls w/o rendering, this may help.
+DLLEXPORT void DLLAPI PetWatchdogThread(void);
+
+// Get the perceived team number of a unit
+DLLEXPORT TeamNum DLLAPI GetPerceivedTeam(Handle h);
+
+// Callback to set item in MisnExport2 - notes that the DLL would like
+// to set a PreSnipe callback. This may by NULL if the DLL does not
+// want to subscribe to these callbacks. DLLs do NOT have to
+// unregister themselves before unloading; when the DLL is unloaded by
+// bzone.exe/bz2edit.exe, all callbacks are automatically cleared.
+//
+// !! Note : If DLLs want to do any actions to the world based on this
+// PreSnipe callback, they should (1) Ensure curWorld == 0 (lockstep)
+// -- do NOTHING if curWorld is != 0, and (2) probably queue up an
+// action to do in the next Execute() call.
+DLLEXPORT void DLLAPI SetPreSnipeCallback(PreSnipeCallback callback);
+
+
+// Callback to set item in MisnExport2 - notes that the DLL would like
+// to set a PreOrdnanceHit callback. This may by NULL if the DLL does not
+// want to subscribe to these callbacks. DLLs do NOT have to
+// unregister themselves before unloading; when the DLL is unloaded by
+// bzone.exe/bz2edit.exe, all callbacks are automatically cleared.
+//
+// Note that the shooters handle *might* be invalid -- consider a
+// mortar (or other slow ordnance) launched by a craft just before
+// that craft explodes. By the time that mortar lands, the shooter is
+// dead.  Thus the ordnance's team is also passed as a possible
+// fallback for identification.
+//
+// This call may not quite catch all ordnance hit events yet; anything
+// derived from a Bullet will probably work well. Anything else may or
+// may not work.  For sniper shells hitting targets, they should
+// always generate a PreOrdnanceHitCallback (in the lockstep world),
+// followed by (an optional) PreSnipeCallback if the sniper shell hit
+// a snipable cockpit, etc. In visual worlds, sniper shells will only
+// generate the PreSnipeCallback.
+DLLEXPORT void DLLAPI SetPreOrdnanceHitCallback(PreOrdnanceHitCallback callback);
+
+
+// Callback to set item in MisnExport2 - notes that the DLL would like
+// to set a PreGetIn callback. This may by NULL if the DLL does not
+// want to subscribe to these callbacks. DLLs do NOT have to
+// unregister themselves before unloading; when the DLL is unloaded by
+// bzone.exe/bz2edit.exe, all callbacks are automatically cleared.
+//
+// PreGetIn is called when a pilot tries to enter an empty craft, and
+// all other checks (i.e. craft is empty, masks match, etc) have
+// passed. DLLs can prevent that pilot from entering the craft if
+// desired.
+//
+// !! Note : If DLLs want to do any actions to the world based on this
+// PrePreGetIn callback, they should (1) Ensure curWorld == 0
+// (lockstep) -- do NOTHING if curWorld is != 0, and (2) probably
+// queue up an action to do in the next Execute() call.
+DLLEXPORT void DLLAPI SetPreGetInCallback(PreGetInCallback callback);
+
+
+// Callback to set item in MisnExport2 - notes that the DLL would like
+// to set a PrePowerupPickup callback. This may by NULL if the DLL
+// does not want to subscribe to these callbacks. DLLs do NOT have to
+// unregister themselves before unloading; when the DLL is unloaded by
+// bzone.exe/bz2edit.exe, all callbacks are automatically cleared.
+//
+// PrePowerupPickup is called when a pilot/craft is about to pickup a
+// power up, and all other checks have passed. DLLs can prevent that
+// pick up if desired.
+//
+// !! Note : If DLLs want to do any actions to the world based on this
+// PrePowerupPickup callback, they should (1) Ensure curWorld == 0
+// (lockstep) -- do NOTHING if curWorld is != 0, and (2) probably
+// queue up an action to do in the next Execute() call.
+DLLEXPORT void DLLAPI SetPrePickupPowerupCallback(PrePickupPowerupCallback callback);
+
+
+// Callback to set item in MisnExport2 - notes that the DLL would like
+// to set a PostTargetChanged callback. This may by NULL if the DLL
+// does not want to subscribe to these callbacks. DLLs do NOT have to
+// unregister themselves before unloading; when the DLL is unloaded by
+// bzone.exe/bz2edit.exe, all callbacks are automatically cleared.
+//
+// PostTargetChanged is called when a pilot/craft has changed targets
+//
+DLLEXPORT void DLLAPI SetPostTargetChangedCallback(PostTargetChangedCallback callback);
+
+
+// For DLLs that are trying to get full control of an object's
+// position, this allows the last and current orientation & positions
+// to be set simultaneously. The caller should take care to set
+// lastMatrix to what was passed in as the curMatrix last frame, or
+// jittering can occur. Note: repeatedly calling this on tracked
+// vehicles is likely to make the physics system unhappy.
+DLLEXPORT void DLLAPI SetLastCurrentPosition(Handle h, const Matrix &lastMatrix, const Matrix &curMatrix);
 
 #endif
 
